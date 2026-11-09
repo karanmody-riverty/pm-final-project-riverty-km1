@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mara's Journey Map</title>
+<style>
+  :root {
+    --bg: #f6f5f1; --surface: #ffffff; --ink: #1c1f1a; --muted: #5d6459; --line: #e4e2da;
+    --accent: #1e3111; --accent-2: #4f7a3a; --soft: #eef3ea;
+    --today: #b5673a; --today-soft: #f8ede5;
+    --p1: #4f7a3a; --p2: #3e6f78; --p3: #6a5a9a; --p4: #9a6a2e;
+    --agent: #34495e;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #121410; --surface: #1b1e18; --ink: #ecefe8; --muted: #a3ab9e; --line: #2e3329;
+      --accent: #b9d8a4; --accent-2: #8fbf74; --soft: #222c1f;
+      --today: #e0a37c; --today-soft: #33261c;
+      --p1: #8fbf74; --p2: #7fbcc6; --p3: #b2a3e0; --p4: #e0b074; --agent: #9fb4c9;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #121410; --surface: #1b1e18; --ink: #ecefe8; --muted: #a3ab9e; --line: #2e3329;
+    --accent: #b9d8a4; --accent-2: #8fbf74; --soft: #222c1f;
+    --today: #e0a37c; --today-soft: #33261c;
+    --p1: #8fbf74; --p2: #7fbcc6; --p3: #b2a3e0; --p4: #e0b074; --agent: #9fb4c9;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif; }
+  .page { max-width: 1560px; margin: 0 auto; padding: 36px 24px 48px; }
+
+  .eyebrow { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent-2); font-weight: 600; }
+  h1 { font-size: 30px; line-height: 1.15; margin: 6px 0 10px; letter-spacing: -.01em; }
+  .lede { color: var(--muted); max-width: 900px; margin: 0 0 20px; font-size: 15px; }
+  .meta { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 22px; }
+  .chip { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 9px 13px; max-width: 420px; }
+  .chip b { display: block; font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+
+  /* Map grid */
+  .scroller { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; }
+  .map { display: grid; grid-template-columns: 132px repeat(8, minmax(158px, 1fr)); min-width: 1420px; }
+  .map > div { padding: 11px 12px; border-bottom: 1px solid var(--line); border-left: 1px solid var(--line); }
+  .map > .rl { border-left: 0; position: sticky; left: 0; background: var(--surface); z-index: 2;
+    font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; font-weight: 700; color: var(--muted);
+    display: flex; align-items: center; }
+  .map > div.last { border-bottom: 0; }
+
+  .phase { color: #fff; font-weight: 700; font-size: 13px; letter-spacing: .02em; border-left-color: transparent !important; display: flex; align-items: center; gap: 8px; }
+  .phase .n { width: 22px; height: 22px; border-radius: 50%; background: rgba(255,255,255,.25); display: grid; place-items: center; font-size: 12px; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .phase { color: #121410; } }
+  :root[data-theme="dark"] .phase { color: #121410; }
+
+  .stage { font-weight: 700; font-size: 15px; }
+  .persona { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; font-size: 12.5px; }
+  .persona::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--accent-2); }
+  .persona.agent::before { background: var(--agent); }
+  .touch { display: inline-block; font-size: 12px; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 2px 7px; }
+  .thought { font-style: italic; }
+  .backstage { font-size: 12.5px; color: var(--muted); }
+
+  /* Emotion row */
+  .emo { position: relative; height: 150px; padding: 0 !important; }
+  .emo svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .emo .line-future { fill: none; stroke: var(--accent-2); stroke-width: 3; vector-effect: non-scaling-stroke; }
+  .emo .line-today { fill: none; stroke: var(--today); stroke-width: 2; stroke-dasharray: 5 5; vector-effect: non-scaling-stroke; }
+  .emo-cells { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(8, 1fr); }
+  .emo-cell { position: relative; border-left: 1px solid var(--line); }
+  .emo-cell:first-child { border-left: 0; }
+  .pt { position: absolute; left: 50%; transform: translate(-50%, -50%); text-align: center; white-space: nowrap; }
+  .pt .d { width: 14px; height: 14px; border-radius: 50%; margin: 0 auto 3px; border: 3px solid var(--surface); }
+  .pt.f .d { background: var(--accent-2); box-shadow: 0 0 0 1px var(--accent-2); }
+  .pt.t .d { background: var(--today); width: 9px; height: 9px; border-width: 2px; }
+  .pt .lbl { font-size: 11.5px; font-weight: 700; }
+  .pt.t .lbl { font-weight: 500; color: var(--today); font-size: 10.5px; }
+  .emo-label { flex-direction: column; align-items: flex-start !important; justify-content: center; gap: 8px; }
+  .legend { display: flex; flex-direction: column; gap: 4px; text-transform: none; letter-spacing: 0; font-weight: 500; font-size: 11px; }
+  .legend span::before { content: ""; display: inline-block; width: 16px; height: 0; border-top: 3px solid var(--accent-2); vertical-align: middle; margin-right: 5px; }
+  .legend span.t::before { border-top: 2px dashed var(--today); }
+
+  .fixed { font-size: 12.5px; }
+  .fixed .was { color: var(--today); display: block; text-decoration: line-through; text-decoration-thickness: 1px; }
+  .fixed .ref { font-size: 10.5px; color: var(--muted); }
+  .gap { font-size: 12.5px; }
+  .gap.has { background: var(--today-soft); }
+  .gap.has::before { content: "⚠ "; color: var(--today); }
+
+  /* Below the map */
+  .below { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 22px; }
+  .adv { background: var(--soft); border-radius: 14px; padding: 16px 18px; }
+  .adv .big { font-size: 18px; font-weight: 700; color: var(--accent); margin-bottom: 4px; }
+  .adv p { margin: 0; }
+  .adv small { display: block; margin-top: 6px; color: var(--muted); }
+  .hint { font-size: 12px; color: var(--muted); margin: 8px 2px 0; }
+  footer { margin-top: 24px; font-size: 12px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; }
+
+  @media (max-width: 820px) {
+    .page { padding: 24px 16px 36px; }
+    h1 { font-size: 24px; }
+    .below { grid-template-columns: 1fr; }
+  }
+  @media print {
+    @page { size: A3 landscape; margin: 10mm; }
+    body { background: #fff; font-size: 11px; }
+    .page { padding: 0; max-width: none; }
+    .scroller { overflow: visible; }
+    .map { min-width: 0; }
+    .hint { display: none; }
+  }
+</style>
+</head>
+<body>
+<main class="page">
+
+  <div class="eyebrow">BU Collection · A Fair Way Forward · Future-state journey map</div>
+  <h1>From reminder to a plan Mara can keep</h1>
+  <p class="lede">Riverty is moving instalment agreements from agent-assisted handling to guided digital self-service, connecting the portal, decision logic and agent tools it already has into one journey that ends in a plan the consumer can keep.</p>
+
+  <div class="meta">
+    <div class="chip"><b>Mara · consumer</b>Shift worker, two open claims, on her phone during short breaks after a reminder.</div>
+    <div class="chip"><b>Daniel · collection agent</b>Picks up calls and failed plans; needs to see what the consumer entered and why.</div>
+    <div class="chip"><b>Success</b>SSR and the 60-day kept rate rising together, not SSR alone.</div>
+  </div>
+
+  <div class="scroller">
+    <div class="map">
+
+      <!-- Phases -->
+      <div class="rl">Phase</div>
+      <div class="phase" style="grid-column: span 2; background: var(--p1)"><span class="n">1</span>See it all</div>
+      <div class="phase" style="grid-column: span 2; background: var(--p2)"><span class="n">2</span>Share safely</div>
+      <div class="phase" style="grid-column: span 2; background: var(--p3)"><span class="n">3</span>Choose a plan</div>
+      <div class="phase" style="grid-column: span 2; background: var(--p4)"><span class="n">4</span>Keep it going</div>
+
+      <!-- Stage -->
+      <div class="rl">Stage</div>
+      <div class="stage">Notice</div>
+      <div class="stage">Open</div>
+      <div class="stage">Understand</div>
+      <div class="stage">Share</div>
+      <div class="stage">Choose</div>
+      <div class="stage">Confirm</div>
+      <div class="stage">Keep</div>
+      <div class="stage">Get help</div>
+
+      <!-- Persona -->
+      <div class="rl">Persona</div>
+      <div><span class="persona">Mara</span></div>
+      <div><span class="persona">Mara</span></div>
+      <div><span class="persona">Mara</span></div>
+      <div><span class="persona">Mara</span></div>
+      <div><span class="persona">Mara</span></div>
+      <div><span class="persona">Mara</span></div>
+      <div><span class="persona">Mara</span></div>
+      <div><span class="persona agent">Daniel</span> <span class="backstage">(+ Mara)</span></div>
+
+      <!-- Step -->
+      <div class="rl">Step</div>
+      <div>Reads a reminder on her break and taps the link</div>
+      <div>Sees both claims and one total</div>
+      <div>Reads why income is asked and what a missed payment means</div>
+      <div>Enters a typical month's income; can stop and resume</div>
+      <div>Picks the recommended plan for both claims and a payday date</div>
+      <div>Confirms and saves a copy</div>
+      <div>Gets a reminder before each due date and pays</div>
+      <div>If things change, calls; Daniel already has her case</div>
+
+      <!-- Touchpoint -->
+      <div class="rl">Touchpoint</div>
+      <div><span class="touch">SMS / email reminder</span></div>
+      <div><span class="touch">Portal · case overview</span></div>
+      <div><span class="touch">Help text · AI assistant</span></div>
+      <div><span class="touch">Affordability step</span></div>
+      <div><span class="touch">Plan options</span></div>
+      <div><span class="touch">Confirmation · PDF copy</span></div>
+      <div><span class="touch">Pre-due reminder</span></div>
+      <div><span class="touch">Phone · agent screen</span></div>
+
+      <!-- Thought -->
+      <div class="rl">Thought</div>
+      <div class="thought">"Another one. How much is it now?"</div>
+      <div class="thought">"That's everything I owe, and it matches the letter."</div>
+      <div class="thought">"OK, that's why they ask, and how long they keep it."</div>
+      <div class="thought">"A normal month. I can answer that."</div>
+      <div class="thought">"This one I can actually pay."</div>
+      <div class="thought">"Done, and I know what happens if I'm late."</div>
+      <div class="thought">"Payday's tomorrow. Fine."</div>
+      <div class="thought">Daniel: "I can see what she entered and why."</div>
+
+      <!-- Emotion -->
+      <div class="rl emo-label">Emotion
+        <div class="legend"><span>Future</span><span class="t">Today</span></div>
+      </div>
+      <div class="emo" style="grid-column: span 8">
+        <svg viewBox="0 0 800 100" preserveAspectRatio="none" aria-hidden="true">
+          <!-- y: 10 = very positive, 90 = very negative; x = column centres -->
+          <polyline class="line-today" points="50,72 150,80 250,84 350,90 450,58 550,62 650,90 750,82" />
+          <polyline class="line-future" points="50,72 150,44 250,36 350,36 450,22 550,16 650,26 750,26" />
+        </svg>
+        <div class="emo-cells">
+          <div class="emo-cell"><div class="pt f" style="top:72%"><div class="d"></div><div class="lbl">Anxious</div></div></div>
+          <div class="emo-cell"><div class="pt f" style="top:44%"><div class="d"></div><div class="lbl">Relieved</div></div><div class="pt t" style="top:86%"><div class="d"></div><div class="lbl">Confused</div></div></div>
+          <div class="emo-cell"><div class="pt f" style="top:36%"><div class="d"></div><div class="lbl">Reassured</div></div><div class="pt t" style="top:90%"><div class="d"></div><div class="lbl">Wary</div></div></div>
+          <div class="emo-cell"><div class="pt f" style="top:36%"><div class="d"></div><div class="lbl">Calm</div></div><div class="pt t" style="top:94%"><div class="d"></div><div class="lbl">Gives up</div></div></div>
+          <div class="emo-cell"><div class="pt f" style="top:22%"><div class="d"></div><div class="lbl">Confident</div></div><div class="pt t" style="top:64%"><div class="d"></div><div class="lbl">Unsure</div></div></div>
+          <div class="emo-cell"><div class="pt f" style="top:16%"><div class="d"></div><div class="lbl">Relieved</div></div><div class="pt t" style="top:68%"><div class="d"></div><div class="lbl">Uneasy</div></div></div>
+          <div class="emo-cell"><div class="pt f" style="top:26%"><div class="d"></div><div class="lbl">Steady</div></div><div class="pt t" style="top:94%"><div class="d"></div><div class="lbl">Missed it</div></div></div>
+          <div class="emo-cell"><div class="pt f" style="top:26%"><div class="d"></div><div class="lbl">Supported</div></div><div class="pt t" style="top:88%"><div class="d"></div><div class="lbl">Repeats it all</div></div></div>
+        </div>
+      </div>
+
+      <!-- Behind the scenes -->
+      <div class="rl">Behind the scenes</div>
+      <div class="backstage">Reminder sent from the case; deep link opens her case</div>
+      <div class="backstage">Claims and amounts pulled from the backend, same source as the letter</div>
+      <div class="backstage">Approved, versioned help text; the assistant shows it, never improvises</div>
+      <div class="backstage">Answers saved; only what the plan needs is collected</div>
+      <div class="backstage">Plan sized by affordability rules; reason for the recommendation stored</div>
+      <div class="backstage">Nothing written until she confirms; what was shown is logged</div>
+      <div class="backstage">Reminder scheduled before the due date, not after</div>
+      <div class="backstage">Handoff summary: inputs, plan reason, history; overrides logged</div>
+
+      <!-- Pain removed -->
+      <div class="rl">Pain removed</div>
+      <div class="fixed"><span class="was">Opens later, or not at all</span>One tap to her case</div>
+      <div class="fixed"><span class="was">One claim at a time; amount ≠ letter</span>One view, one total <span class="ref">N-03 · T-202 · N-07</span></div>
+      <div class="fixed"><span class="was">Calls to ask why</span>Answered upfront <span class="ref">N-06 · T-206 · 16.2% of contacts</span></div>
+      <div class="fixed"><span class="was">"This month or a normal month?"</span>Clear question, progress kept <span class="ref">N-01 · T-204</span></div>
+      <div class="fixed"><span class="was">Shortest plan looks "right"</span>Plan she can keep <span class="ref">N-02 · 17.3% ask to combine</span></div>
+      <div class="fixed"><span class="was">Unsure what late means</span>Consequences shown first <span class="ref">N-05 · T-208 · 18.6%</span></div>
+      <div class="fixed"><span class="was">Reminder after due date</span>Reminder before <span class="ref">T-207</span></div>
+      <div class="fixed"><span class="was">Agent re-collects everything</span>Context on screen <span class="ref">N-08 · N-09 · T-205</span></div>
+
+      <!-- Remaining gap -->
+      <div class="rl last">Remaining gap</div>
+      <div class="gap last"></div>
+      <div class="gap has last">Purchased portfolios: amount data can still be wrong upstream (N-11)</div>
+      <div class="gap last"></div>
+      <div class="gap has last">Mobile upload still breaks (T-201); skip the document under a set amount?</div>
+      <div class="gap has last">Riskiest bet: does sizing to affordability cut breakage? Test it</div>
+      <div class="gap last"></div>
+      <div class="gap last"></div>
+      <div class="gap has last">Vulnerable consumers need a clear support path, not just a summary</div>
+
+    </div>
+  </div>
+  <p class="hint">On a narrow screen, scroll the map sideways. The first column stays in place.</p>
+
+  <div class="below">
+    <div class="adv"><div class="big">2 min, not 12</div><p>Finished on a break instead of a 12-minute agent call.</p><small>Average handle time ≈ 12 min across the top contact reasons.</small></div>
+    <div class="adv"><div class="big">Built to last</div><p>Plan sized to her budget, not the shortest term, so fewer plans should break.</p><small>Hypothesis: 60-day missed payments are 19.0% today.</small></div>
+    <div class="adv"><div class="big">One shared record</div><p>Daniel sees what she entered, so checks aren't repeated and every plan is explainable.</p><small>Addresses N-08, N-09, N-12.</small></div>
+  </div>
+
+  <footer>Product School workshop · All people, numbers and events are fictional sample data, not Riverty research.</footer>
+</main>
+</body>
+</html>
