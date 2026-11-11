@@ -150,19 +150,32 @@
 </main>
 
 <script>
-  const FEATURES = [
-    { id: "B2", name: "Plain explainer for why income is asked and how it is used", rationale: "Very quick win for static text.", value: 5, effort: 1, lane: "now" },
-    { id: "B4", name: "Handoff summary for the agent when a consumer calls", rationale: "It's easy, I'd say.", value: 3, effort: 1, lane: "now" },
-    { id: "B6", name: "Pick a payment date that matches pay day", rationale: "Shift workers miss 22.5% of payments vs 17.4%; a due date after payday protects keeping, and it's cheap.", value: 4, effort: 1, lane: "now" },
-    { id: "B1", name: "One plan for several open claims", rationale: "Big game.", value: 5, effort: 5, lane: "next" },
-    { id: "B3", name: "Affordability check before the plan options", rationale: "Big game.", value: 5, effort: 4, lane: "next" },
-    { id: "B5", name: "Photo upload that works on mobile, or skip the document under a set amount", rationale: "I believe this would have medium impact.", value: 3, effort: 1, lane: "later" },
-    { id: "B8", name: "Chat assistant on every portal page", rationale: "Chat users miss more payments (21.6% vs 18.3%); more entry points widen reach without fixing the moment of misery.", value: 4, effort: 5, lane: "later" },
-    { id: "B7", name: "Show the shortest plan first to raise recovery", rationale: "Raised missed payments 3.4 pts with no gain in kept plans (37.3% → 37.3%); breaks the guardrail.", value: 1, effort: 1, lane: "cut" },
-  ];
+  const NAMES = {
+    B1: "One plan for several open claims",
+    B2: "Plain explainer for why income is asked and how it is used",
+    B3: "Affordability check before the plan options",
+    B4: "Handoff summary for the agent when a consumer calls",
+    B5: "Photo upload that works on mobile, or skip the document under a set amount",
+    B6: "Pick a payment date that matches pay day",
+    B7: "Show the shortest plan first to raise recovery",
+    B8: "Chat assistant on every portal page",
+  };
+  const VIEWS = {
+    revised: [
+      { id: "B5", value: 4, effort: 1, lane: "now", rationale: "Biggest single funnel drop: the document step loses 1,313 starters (22.1%), 853 documents never arrive (T-201), 78% are on mobile." },
+      { id: "B2", value: 4, effort: 1, lane: "now", rationale: "The income steps cause 61% of drop-outs (N-01, N-06; 16.2% of contacts). Helps people finish, not keep, so 4, not 5." },
+      { id: "B6", value: 4, effort: 1, lane: "now", rationale: "Shift workers miss 22.5% of payments vs 17.4%; a due date after payday protects keeping, and it's cheap." },
+      { id: "B3", value: 5, effort: 4, lane: "next", rationale: "First in line. Sizes plans to income, not the shortest term (N-02); directly protects the guardrail. Must be explainable (N-12)." },
+      { id: "B1", value: 5, effort: 5, lane: "next", rationale: "Core of the hypothesis (N-03): multi-claim SSR 26% vs 40.6%. Thin slice first: claims from the same client or portfolio." },
+      { id: "B4", value: 3, effort: 3, lane: "next", rationale: "Cuts agent handle time (N-08), a cost win, not a kept-plan win. Needs agent-tool integration (T-205). Must be in place before scaling." },
+      { id: "B8", value: 1, effort: 5, lane: "later", rationale: "Chat users miss more payments (21.6% vs 18.3%). Revisit only once the chat shows missed-payment consequences before confirming (T-208)." },
+      { id: "B7", value: 1, effort: 1, lane: "cut", rationale: "Raised missed payments 3.4 pts with no gain in kept plans (37.3% → 37.3%); breaks the guardrail. Revert today's default." },
+    ],
+  };
   const ORDER = ["now", "next", "later", "cut"];
   const LABEL = { qw: "Quick Win", mp: "Major Project", fi: "Fill-In", ts: "Time Sinker" };
-  const KEY = "bu-collection-roadmap-v1";
+  const FEATURES = VIEWS.revised.map(f => ({ ...f, name: NAMES[f.id] }));
+  const KEY = "bu-collection-roadmap-v3";
 
   const quadrant = f => (f.value >= 4 ? (f.effort <= 2 ? "qw" : "mp") : (f.effort <= 2 ? "fi" : "ts"));
 
