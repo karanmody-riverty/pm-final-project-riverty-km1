@@ -1,17 +1,29 @@
-# Hypothesis & Success Metrics
+# Hypothesis & Success Metrics (Module 3)
 
-> **Module 3 · ★ Deliverable 3.** Repo file `03-analytics/hypothesis-and-metrics.md` — part of your submission.
-> Do the lab in the **Module 3 · Exercise Guide** (linked from the Module 3 deck), then click **⬇ Download .md** — it saves as this exact file. Commit it here.
-> It feeds the **Problem, Value & Hypothesis** slide of your Module 6 final deck.
+## Pre-work · Hypothesis check
+- **Role , who you are solving for (from M2):** Mara, with two claims, shift income and on mobile.
+- **Goal , what this user is ultimately trying to achieve:** To agree to one plan she can actually keep, covering all her claims, without having to call anyone.
+- **Friction / moment of misery , the specific pain blocking their goal:** On her phone during a break, she meets an income question she can’t answer: does it mean this month or a normal month? Nothing explains why it’s asked or how long it’s kept. She can only see one claim at a time and doesn’t know if paying one stops the letters about the other. If she gets through, the shortest plan looks like the right answer, and she misses the second payment
+- **Current workaround , the external tool or manual process they rely on (M2):** She closes the portal and calls an agent to ask what “income” means, whether her claims can be combined and what happens if she misses a payment. She checks her paper letters to work out what she owes. The agent then asks for everything again, because he can’t see what she entered online
+- **Problem Hook , your one-sentence framing of the business crisis (M1):** Half of agent contacts after an online plan attempt are questions the portal never answers, and one in five plans consumers agree to breaks within 60 days. We pay twice, in agent time and in failed recovery.
+- **Value Proposition , the outcome your initiative promised to deliver (M1):** A mobile-first instalment journey that answers the three big questions upfront, lets consumers combine several claims into one plan, sizes the plan to what the consumer can keep, and gives the agent a summary when the consumer still calls. Success means SSR and the 60-day kept rate rising together
 
-## Finalized product hypothesis
+## Read the evidence in your case
+- **Where does your case say people stall or leave? Does that match the friction you wrote in Module 2?:** The two income steps lose 2,734 of the 4,514 starters who drop out (61%), which matches N-01 statement and T-201 ticket. The 78% gap between portal entry and journey start isn’t measured intent, so I'd ask for what portal visitors actually did, plus a funnel split by number of claims.
+- **What got better or worse in the case, and does that support the workaround your persona uses?:** After the 6-month plan was shown first, SSR rose from 32.3% to 34.7% and missed payments from 15.6% to 19.0%. Kept plans per starter stayed flat at 37.3%, so the shortest-plan workaround is confirmed. Agent contacts falling (33.4% → 31.0%) contradicts that, but SSR’s 7-day window misses calls caused by plans that break later, so I'd ask for contacts made 8–60 days after an agreement.
+- **Which user in the case is carrying the pain, and is that the person your Module 2 persona describes?:** Multi-claim consumers are worst on every rate (SSR 26% vs 40.6%) and make 47% of agent contacts. Shift workers break plans most often (22.5% vs 17.4%). By headcount, though, most broken plans come from single-claim and fixed-salary consumers. Mara fits the segment that’s worst by rate, but “two claims plus shift income” together needs a cross-tab of the row-level data to confirm.
 
-> Based on [qual + quant evidence], I believe that [solving X] for [persona] will result in [outcome], as measured by a [X%] change in [success metric]. I will protect [guardrail metric] and make a go/no-go decision after [decision window].
+## Step 2 · Craft your hypothesis
+- **Qualitative evidence (from M2) , quote the specific friction / moment of misery for your persona:** "It asked for my income and I did not know if they meant this month or a normal month. I closed it” (N-01). “I could only see one claim at a time” (N-03). “I picked the plan with the lowest number of months… I missed the second payment” (N-02).
+- **Quantitative evidence (from M3) , name the metric or data point that confirms the pain; cite the number:** Multi-claim consumers: SSR 26.0% vs 40.6% for one claim, 47% of agent contacts, 21.4% missed payments. The income steps lose 61% of everyone who drops out. After the shortest plan was shown first, missed payments rose from 15.6% to 19.0%, while kept plans per starter stayed at 37.3%.
+- **Persona , role, goal, and the friction you confirmed in the reconciliation steps:** Mara, a shift worker with two claims on mobile, who wants one plan for all her claims that she can keep, without calling. The friction is confirmed: there’s no combined view, the income question is unclear, and the shortest plan is pushed first.
+- **Problem you are solving , one sentence describing the specific friction this initiative removes:** Multi-claim consumers can’t set up one affordable plan online, so they either call an agent or agree to a plan they can’t keep.
+- **Strategic outcome , what behaviour change do you expect, and how does it map to retention / revenue / churn?:** More multi-claim consumers agree to and keep one plan online. That means more recovery (revenue), fewer agent calls (cost), and fewer broken plans showing up in client reporting (client retention).
+- **Primary success metric (initiative signal) , the leading indicator that tells you the gap is closing:** Kept plans per multi-claim starter: plans with no missed payment within 60 days. The baseline is about 27.4% (derived: about 813 of 2,968 starters). The early read is the first instalment paid on time, around day 30.
+- **Guardrail metric (product signal) , the metric that must NOT drop; it protects your existing base:** The 60-day missed-payment rate must not rise above 19.0%. The single-claim agreement rate must not fall below 52.1%.
+- **Decision window , how much time or data before you scale, pivot, or kill? minimum threshold to proceed?:** A 50/50 test in the German pilot, with about 1,500 multi-claim starters per group per month. About 1,300 per group are needed to detect a 5-point lift, so that’s 1 month of sign-ups plus 60 days of follow-up, about 3 months in total.
 
-## Success metrics
-
-| Metric | Type | Target | Why it matters |
-|---|---|---|---|
-| _North-star_ | | _____ | _____ |
-| _Leading indicator_ | | _____ | _____ |
-| _Guardrail_ | | _____ | _____ |
+Scale if kept plans rise by 5 points or more and the guardrail holds.
+Pivot if agreements rise but kept plans don’t.
+Kill if missed payments rise by more than 2 points.
+- **Draft your full hypothesis sentence , one to three sentences; quote the metric, name the persona, name the outcome:** Based on N-01, N-02 and N-03, a 26% SSR for multi-claim consumers (vs 40.6%), and missed payments rising from 15.6% to 19.0%, I believe that one combined plan sized to a typical month’s income for multi-claim consumers like Mara will result in more plans agreed and kept online, as measured by a 5-point rise (27.4% → 32.4%) in kept plans per multi-claim starter. I will protect the 60-day missed-payment rate (≤19%) and will make a go/no-go decision after a 3-month pilot in Germany (1 month of sign-ups plus 60 days of follow-up).
