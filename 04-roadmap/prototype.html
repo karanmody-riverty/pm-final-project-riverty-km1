@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clear Income Question</title>
+<style>
+  /* Product UI context (brand bundle contexts.md + tokens/design-system.md), Alta UI values.
+     Semantic tokens only, light + dark. System sans for UI text, system serif for monetary totals. */
+  :root {
+    --r-text-regular: #282828;
+    --r-text-soft: #686868;
+    --r-text-inverse: #FFFFFF;
+    --r-text-brand: #527A42;              /* large text only (24px+) */
+    --r-background-softer: #F7F7F7;       /* mobile app background */
+    --r-background-softest: #FFFFFF;      /* inputs, cards */
+    --r-background-soft: #E5E5E5;
+    --r-background-regular: #282828;      /* primary button */
+    --r-background-brand-softest: #E5EBE3;
+    --r-background-state-hovered: rgba(40, 40, 40, 0.04);
+    --r-border-regular: #282828;
+    --r-border-softer: #C9C9C9;
+    --r-border-softest: #E5E5E5;
+    --r-border-brand: #527A42;
+    --r-border-focused: #0071E3;
+    --r-status-error-regular: #B00C15;
+    --r-status-error-soft: #FEF6F6;
+    --r-status-info-regular: #3E5C73;
+    --r-status-info-soft: #F8FAFB;
+    --r-status-success-regular: #298535;
+    --r-status-success-soft: #F7FDF8;
+    --r-radius-s: 4px; --r-radius-m: 8px; --r-radius-l: 12px;
+    --page: #E5E5E5;                      /* desktop canvas behind the phone frame (r-background-soft) */
+    --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", Roboto, "Segoe UI", system-ui, sans-serif;
+    --font-money: "New York", Georgia, "Times New Roman", serif;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --r-text-regular: #F7F7F7; --r-text-soft: #C9C9C9; --r-text-inverse: #282828; --r-text-brand: #6DA258;
+      --r-background-softer: #141414; --r-background-softest: #282828; --r-background-soft: #000000;
+      --r-background-regular: #F7F7F7; --r-background-brand-softest: #323A2F;
+      --r-background-state-hovered: rgba(247, 247, 247, 0.04);
+      --r-border-regular: #F7F7F7; --r-border-softer: #686868; --r-border-softest: #C9C9C9; --r-border-brand: #6DA258;
+      --r-status-error-regular: #FF969C; --r-status-error-soft: #190606;
+      --r-status-info-regular: #AFC3D4; --r-status-info-soft: #222528;
+      --r-status-success-regular: #80CE88; --r-status-success-soft: #212B22;
+      --page: #000000;
+      color-scheme: dark;
+    }
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html, body { margin: 0; }
+  body { background: var(--page); color: var(--r-text-regular); font: 15px/1.45 var(--font-ui); }
+  .layout { display: flex; gap: 24px; justify-content: center; align-items: flex-start; padding: 24px 16px; flex-wrap: wrap; }
+
+  /* Phone frame: 375 x 667 on desktop, full-bleed on a phone */
+  .phone { width: 375px; height: 667px; background: var(--r-background-softer); border-radius: var(--r-radius-l);
+    border: 1px solid var(--r-border-softer); overflow: hidden; display: flex; flex-direction: column; }
+  .appbar { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--r-background-softest);
+    border-bottom: 1px solid var(--r-border-softest); }
+  .appbar picture, .appbar img { display: block; width: 96px; height: auto; }
+  .appbar .who { font-size: 12px; color: var(--r-text-soft); }
+  .screen { flex: 1; overflow-y: auto; padding: 16px; display: none; flex-direction: column; gap: 12px; }
+  .screen.active { display: flex; }
+
+  h1 { font-size: 20px; line-height: 1.25; margin: 0; font-weight: 600; }
+  .step { font-size: 12px; color: var(--r-text-soft); font-weight: 600; letter-spacing: .04em; }
+  .muted { color: var(--r-text-soft); font-size: 13px; }
+
+  .claim { background: var(--r-background-softest); border: 1px solid var(--r-border-softest); border-radius: var(--r-radius-m); padding: 12px 14px;
+    display: flex; justify-content: space-between; gap: 12px; }
+  .claim b { display: block; font-size: 14px; }
+  .claim span { font-size: 12px; color: var(--r-text-soft); }
+  .claim .amt { font-family: var(--font-money); font-size: 18px; white-space: nowrap; }
+  .total { display: flex; justify-content: space-between; align-items: baseline; padding: 4px 2px; }
+  .total .amt { font-family: var(--font-money); font-size: 28px; }
+  .steps { display: flex; gap: 6px; flex-wrap: wrap; font-size: 12px; color: var(--r-text-soft); }
+  .steps span { background: var(--r-background-softest); border: 1px solid var(--r-border-softest); border-radius: 999px; padding: 3px 10px; }
+  .steps span.now { border-color: var(--r-border-brand); color: var(--r-text-regular); }
+
+  label.q { font-size: 17px; font-weight: 600; }
+  .hint { font-size: 14px; color: var(--r-text-regular); background: var(--r-background-brand-softest); border-radius: var(--r-radius-s); padding: 6px 10px; margin: 0; }
+  .field { display: flex; align-items: center; background: var(--r-background-softest); border: 1px solid var(--r-border-regular);
+    border-radius: var(--r-radius-m); padding: 0 12px; }
+  .field:focus-within { outline: 2px solid var(--r-border-focused); outline-offset: 1px; }
+  .field.invalid { border-color: var(--r-status-error-regular); }
+  .field input { flex: 1; border: 0; background: transparent; color: var(--r-text-regular); font: 600 20px var(--font-ui); padding: 12px 0; min-width: 0; outline: none; }
+  .field input::placeholder { color: var(--r-text-soft); font-weight: 400; }
+  .field .cur { font-size: 18px; color: var(--r-text-soft); }
+  .field input:disabled { opacity: .5; }
+  .err { color: var(--r-status-error-regular); font-size: 13px; margin: -4px 0 0; min-height: 0; }
+  .expl { font-size: 14px; margin: 0; display: flex; gap: 8px; }
+  .expl::before { content: ""; flex: none; width: 4px; border-radius: 2px; background: var(--r-border-softer); }
+  .check { display: flex; gap: 8px; align-items: center; font-size: 14px; }
+  .check input { width: 18px; height: 18px; accent-color: var(--r-background-regular); }
+  details { font-size: 14px; }
+  details summary { cursor: pointer; color: var(--r-text-regular); text-decoration: underline; text-underline-offset: 3px; }
+  details ul { margin: 6px 0 0; padding-left: 20px; color: var(--r-text-regular); }
+  .note { border-radius: var(--r-radius-m); padding: 10px 12px; font-size: 13.5px; margin: 0; }
+  .note.info { background: var(--r-status-info-soft); border: 1px solid var(--r-status-info-regular); }
+  .note.error { background: var(--r-status-error-soft); border: 1px solid var(--r-status-error-regular); }
+  .note.success { background: var(--r-status-success-soft); border: 1px solid var(--r-status-success-regular); }
+  .blocked h2 { font-size: 16px; margin: 0 0 4px; }
+
+  .actions { margin-top: auto; display: flex; flex-direction: column; gap: 8px; padding-top: 4px; }
+  button { font: 600 15px var(--font-ui); cursor: pointer; }
+  .btn { text-transform: uppercase; letter-spacing: .04em; border-radius: var(--r-radius-m); padding: 13px 16px; border: 1px solid var(--r-border-regular); }
+  .btn.primary { background: var(--r-background-regular); color: var(--r-text-inverse); }
+  .btn.secondary { background: transparent; color: var(--r-text-regular); }
+  .btn:disabled { opacity: .35; cursor: not-allowed; }
+  .btn:focus-visible, .link:focus-visible, summary:focus-visible { outline: 2px solid var(--r-border-focused); outline-offset: 2px; }
+  .link { background: none; border: 0; color: var(--r-text-regular); text-decoration: underline; text-underline-offset: 3px; padding: 6px; font-weight: 500; }
+  .person { display: none; }
+  .person.open { display: block; }
+  .summary { background: var(--r-background-softest); border: 1px solid var(--r-border-softest); border-radius: var(--r-radius-m); padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+  .summary .amt { font-family: var(--font-money); font-size: 28px; }
+
+  /* Prototype panel */
+  .panel { width: 360px; max-width: 100%; background: var(--r-background-softest); border: 1px dashed var(--r-border-softer); border-radius: var(--r-radius-l); padding: 16px; font-size: 13px; }
+  .panel h2 { font-size: 14px; margin: 0 0 4px; }
+  .panel h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--r-text-soft); margin: 14px 0 6px; }
+  .panel ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; max-height: 220px; overflow-y: auto; }
+  .panel li { font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; background: var(--r-background-softer); border-radius: var(--r-radius-s); padding: 4px 6px; overflow-wrap: anywhere; }
+  .panel .row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+  .panel button { font-size: 12px; padding: 6px 10px; border-radius: var(--r-radius-s); border: 1px solid var(--r-border-softer); background: transparent; color: var(--r-text-regular); }
+
+  @media (max-width: 440px) {
+    .layout { padding: 0; gap: 16px; }
+    .phone { width: 100%; height: 100dvh; min-height: 560px; border-radius: 0; border: 0; }
+    .panel { margin: 0 16px 24px; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <div class="phone" role="application" aria-label="Riverty portal prototype">
+    <div class="appbar">
+      <picture>
+        <source srcset="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iRWJlbmVfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2ZXJzaW9uPSIxLjEiIHZpZXdCb3g9IjAgMCA4OTIgMTAwIj4KICA8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMjkuOC4xLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogMi4xLjEgQnVpbGQgMikgIC0tPgogIDxkZWZzPgogICAgPHN0eWxlPgogICAgICAuc3QwIHsKICAgICAgICBmaWxsOiAjZTdlNGUyOwogICAgICB9CiAgICA8L3N0eWxlPgogIDwvZGVmcz4KICA8ZyBpZD0iUGFnZUl0ZW0yMzAiPgogICAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTg5MiwwaC0yNy41bC0yNS40LDM0TDgxMy41LDBoLTI4LjdsNDIuMSw1NS4xdjQ0LjloMjMuMXYtNDQuOUw4OTIsMFpNNzE3LjgsMTkuN2gzNy4xVjBoLTk3djE5LjdoMzcuMXY4MC4zaDIyLjlWMTkuN1pNNjIwLjMsMTAwbC0yNi4zLTM4LjVjMTQuMS0zLjgsMjEuNS0xNCwyMS41LTI5LjhTNjAzLDAsNTc5LjgsMGgtNTkuNnYxMDBoMjIuOXYtMzYuOGgyNS4zbDI0LjksMzYuOGgyNy4xWk01OTIuMSwzMS42YzAsOC4xLTQuNywxMS45LTE0LjgsMTEuOWgtMzQuMXYtMjMuOGgzNC4xYzEwLjEsMCwxNC44LDMuOCwxNC44LDExLjlaTTM2Ni41LDEwMGg5MC40di0xOS43aC02Ny41di0yMC43aDU3Ljl2LTE5LjdoLTU3Ljl2LTIwLjFoNjcuNVYwaC05MC40djEwMFpNMjc2LjIsMTAwTDMxOC40LDBoLTIzLjhsLTI5LjYsNzRMMjM1LjMsMGgtMjQuOWw0Mi4yLDEwMGgyMy41Wk0xMzkuMSwxMDBoMjIuOVYwaC0yMi45djEwMFpNMjIuOSwxMDBWMjIuOUgwdjc3LjFoMjIuOVpNMjIuOSwyMi45aDc3LjFWMEgyMi45djIyLjlaIi8+CiAgPC9nPgo8L3N2Zz4=" media="(prefers-color-scheme: dark)">
+        <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iRWJlbmVfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2ZXJzaW9uPSIxLjEiIHZpZXdCb3g9IjAgMCA4OTIgMTAwIj4KICA8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMjkuOC4xLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogMi4xLjEgQnVpbGQgMikgIC0tPgogIDxkZWZzPgogICAgPHN0eWxlPgogICAgICAuc3QwIHsKICAgICAgICBmaWxsOiAjNTI3YTQyOwogICAgICB9CiAgICA8L3N0eWxlPgogIDwvZGVmcz4KICA8ZyBpZD0iUGFnZUl0ZW0yMjAiPgogICAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTg5MiwwaC0yNy41bC0yNS40LDM0TDgxMy41LDBoLTI4LjdsNDIuMSw1NS4xdjQ0LjloMjMuMXYtNDQuOUw4OTIsMFpNNzE3LjgsMTkuN2gzNy4xVjBoLTk3djE5LjdoMzcuMXY4MC4zaDIyLjlWMTkuN1pNNjIwLjMsMTAwbC0yNi4zLTM4LjVjMTQuMS0zLjgsMjEuNS0xNCwyMS41LTI5LjhTNjAzLDAsNTc5LjgsMGgtNTkuNnYxMDBoMjIuOXYtMzYuOGgyNS4zbDI0LjksMzYuOGgyNy4xWk01OTIuMSwzMS42YzAsOC4xLTQuNywxMS45LTE0LjgsMTEuOWgtMzQuMXYtMjMuOGgzNC4xYzEwLjEsMCwxNC44LDMuOCwxNC44LDExLjlaTTM2Ni41LDEwMGg5MC40di0xOS43aC02Ny41di0yMC43aDU3Ljl2LTE5LjdoLTU3Ljl2LTIwLjFoNjcuNVYwaC05MC40djEwMFpNMjc2LjIsMTAwTDMxOC40LDBoLTIzLjhsLTI5LjYsNzRMMjM1LjMsMGgtMjQuOWw0Mi4yLDEwMGgyMy41Wk0xMzkuMSwxMDBoMjIuOVYwaC0yMi45djEwMFpNMjIuOSwxMDBWMjIuOUgwdjc3LjFoMjIuOVpNMjIuOSwyMi45aDc3LjFWMEgyMi45djIyLjlaIi8+CiAgPC9nPgo8L3N2Zz4=" alt="Riverty">
+      </picture>
+      <span class="who" id="who"></span>
+    </div>
+
+    <!-- Screen 1: entry point -->
+    <section class="screen" id="screen-overview" aria-labelledby="h-overview">
+      <h1 id="h-overview">Your open claims</h1>
+      <div id="claims"></div>
+      <div class="total"><span>Total</span><span class="amt" id="total"></span></div>
+      <p class="muted">Can't pay it all at once? Set up a monthly plan.</p>
+      <div class="steps" aria-label="Plan steps"><span>1 Income</span><span>2 Plan options</span><span>3 Confirm</span></div>
+      <div class="actions">
+        <button class="btn primary" id="start">Set up a payment plan</button>
+      </div>
+    </section>
+
+    <!-- Screen 2: feature core -->
+    <section class="screen" id="screen-income" aria-labelledby="income-label">
+      <div class="step">STEP 1 OF 3 · YOUR INCOME</div>
+
+      <div id="income-form">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <label class="q" id="income-label" for="income" data-text="TXT-INCOME-LABEL"></label>
+          <p class="hint" id="income-hint" data-text="TXT-INCOME-HINT"></p>
+          <div class="field" id="field">
+            <input id="income" inputmode="decimal" autocomplete="off" placeholder="e.g. 1.850 (example)"
+              aria-describedby="income-hint income-err why retention">
+            <span class="cur" aria-hidden="true">€</span>
+          </div>
+          <p class="err" id="income-err" role="alert"></p>
+          <label class="check" id="confirm-high-wrap" hidden><input type="checkbox" id="confirm-high"> This amount is correct</label>
+          <label class="check"><input type="checkbox" id="no-income"> I have no income right now</label>
+          <p class="expl" id="why" data-text="TXT-INCOME-WHY"></p>
+          <p class="expl" id="retention" data-text="TXT-INCOME-RETENTION"></p>
+          <details id="counts">
+            <summary>What counts as income?</summary>
+            <ul id="counts-list" data-text="TXT-INCOME-COUNTS"></ul>
+          </details>
+          <p class="note info" id="support" data-text="TXT-INCOME-SUPPORT" hidden></p>
+        </div>
+      </div>
+
+      <div class="note error blocked" id="blocked" hidden>
+        <h2>We can't take your income online right now</h2>
+        <p style="margin:0">Part of this page is missing, so we've paused this step. You can talk to a person instead.</p>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary" id="continue" disabled>Continue</button>
+        <button class="link" id="person-toggle" aria-expanded="false" aria-controls="person">Talk to a person</button>
+        <p class="note info person" id="person">In the pilot this opens a call-back request. Demo number: [support number placeholder]</p>
+      </div>
+    </section>
+
+    <!-- Screen 3: confirmation -->
+    <section class="screen" id="screen-done" aria-labelledby="h-done">
+      <div class="step">STEP 1 OF 3 · DONE</div>
+      <h1 id="h-done" data-text="TXT-INCOME-CONFIRM"></h1>
+      <div class="summary">
+        <span class="muted">Your usual monthly income after tax</span>
+        <span class="amt" id="done-amount"></span>
+        <p class="expl" id="done-why" data-text="TXT-INCOME-WHY"></p>
+      </div>
+      <p class="note info" id="done-support" data-text="TXT-INCOME-SUPPORT" hidden></p>
+      <div class="actions">
+        <button class="btn primary" id="to-plans">See my plan options</button>
+        <button class="btn secondary" id="change">Change</button>
+      </div>
+    </section>
+
+    <!-- Stub after the feature -->
+    <section class="screen" id="screen-plans" aria-labelledby="h-plans">
+      <div class="step">STEP 2 OF 3 · PLAN OPTIONS</div>
+      <h1 id="h-plans">Plan options come next</h1>
+      <p class="note success">Not part of this prototype. Plan sizing is a separate feature (B3).</p>
+      <div class="actions">
+        <button class="btn secondary" id="restart">Back to my claims</button>
+      </div>
+    </section>
+  </div>
+
+  <aside class="panel" aria-label="Prototype panel">
+    <h2>Prototype panel</h2>
+    <div class="muted">Not part of the product. Fictional demo data. Nothing leaves this page.</div>
+    <h3>Test switches</h3>
+    <label class="check"><input type="checkbox" id="sim-missing"> Simulate missing approved text (TXT-INCOME-RETENTION)</label>
+    <div class="row"><button id="reset">Reset demo</button></div>
+    <div class="muted" style="margin-top:8px" id="threshold-note"></div>
+    <h3>Approved texts shown</h3>
+    <ul id="texts-shown"></ul>
+    <h3>Events (newest first)</h3>
+    <ul id="events"></ul>
+  </aside>
+</div>
+
+<script>
+  "use strict";
+
+  // Fictional mock data. Amounts come from here, never from the markup.
+  const CASE = {
+    consumer: "Mara (demo)",
+    claims: [
+      { creditor: "Vodagone Mobile", ref: "DEMO-48213", amountCents: 24560 },
+      { creditor: "Stadtwerke Nordheim", ref: "DEMO-51907", amountCents: 41890 },
+    ],
+  };
+
+  // Approved text library: every explanation is rendered by ID and version.
+  const APPROVED_TEXTS = {
+    "TXT-INCOME-LABEL":     { version: 1, text: "Your usual monthly income after tax" },
+    "TXT-INCOME-HINT":      { version: 1, text: "If your pay changes from month to month, use a lower month." },
+    "TXT-INCOME-WHY":       { version: 1, text: "We use this only to suggest a monthly amount you can afford. It doesn't change what you owe." },
+    "TXT-INCOME-RETENTION": { version: 1, text: "Only the team handling your claims sees this. We keep it for [retention: from Data Protection], then delete it." },
+    "TXT-INCOME-COUNTS":    { version: 1, list: ["Wages or salary after tax", "Pay from extra shifts or a second job", "Benefits, such as unemployment or housing benefit", "Child benefit and maintenance you receive", "Pension"] },
+    "TXT-INCOME-SUPPORT":   { version: 1, text: "You can still set up a plan. If money is very tight right now, you can also talk to someone about other options." },
+    "TXT-INCOME-CONFIRM":   { version: 1, text: "Thanks. We'll use this to suggest a plan you can afford." },
+  };
+  const EXPECTED = { "TXT-INCOME-LABEL": 1, "TXT-INCOME-HINT": 1, "TXT-INCOME-WHY": 1, "TXT-INCOME-RETENTION": 1,
+    "TXT-INCOME-COUNTS": 1, "TXT-INCOME-SUPPORT": 1, "TXT-INCOME-CONFIRM": 1 };
+  const REQUIRED_ON_INCOME = ["TXT-INCOME-LABEL", "TXT-INCOME-HINT", "TXT-INCOME-WHY", "TXT-INCOME-RETENTION"];
+
+  const LOW_INCOME_THRESHOLD = 900; // PLACEHOLDER: real value comes from Collections policy
+  const MAX_INCOME = 99999;
+  const STORE = "b2-income-demo-v1";
+
+  const $ = id => document.getElementById(id);
+  const eur = cents => new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(cents / 100);
+  const eurWhole = n => new Intl.NumberFormat("de-DE", { maximumFractionDigits: 0 }).format(n) + " €";
+
+  let simulateMissing = false;
+  let state = { value: null, noIncome: false, submitted: false };
+  let textsShown = new Map();
+  let onIncome = false;
+
+  function library() {
+    const lib = { ...APPROVED_TEXTS };
+    if (simulateMissing) delete lib["TXT-INCOME-RETENTION"];
+    return lib;
+  }
+  function approved(id) {
+    const t = library()[id];
+    return t && t.version === EXPECTED[id] ? t : null;
+  }
+
+  // ---------- storage (per-viewer convenience only) ----------
+  function load() { try { const s = JSON.parse(localStorage.getItem(STORE) || "null"); if (s) state = { ...state, ...s }; } catch (e) {} }
+  function save() { try { localStorage.setItem(STORE, JSON.stringify(state)); } catch (e) {} }
+
+  // ---------- events ----------
+  function track(name, extra) {
+    const ev = { event: name, open_claims: CASE.claims.length,
+      texts: [...textsShown.entries()].map(([id, v]) => `${id}@v${v}`), ...extra, at: new Date().toLocaleTimeString() };
+    console.log("[event]", ev);
+    const li = document.createElement("li");
+    li.textContent = `${ev.at} ${name} · claims=${ev.open_claims}` + (extra ? " · " + JSON.stringify(extra) : "") + ` · ${ev.texts.join(", ")}`;
+    $("events").prepend(li);
+  }
+
+  // ---------- rendering approved texts ----------
+  function renderTexts(scope) {
+    let ok = true;
+    scope.querySelectorAll("[data-text]").forEach(el => {
+      const id = el.dataset.text, t = approved(id);
+      if (!t) { el.textContent = ""; ok = false; return; }
+      if (t.list) { el.innerHTML = ""; t.list.forEach(x => { const li = document.createElement("li"); li.textContent = x; el.appendChild(li); }); }
+      else el.textContent = t.text;
+      if (!el.hidden && !el.closest("[hidden]") && !el.closest("details:not([open])")) textsShown.set(id, t.version);
+    });
+    // Safety guard: any explanation line without an approved ID blocks the step.
+    if (scope.querySelectorAll(".expl:not([data-text])").length) ok = false;
+    return ok;
+  }
+  function refreshShownList() {
+    const ul = $("texts-shown"); ul.innerHTML = "";
+    if (!textsShown.size) { ul.innerHTML = "<li>none on this screen</li>"; return; }
+    textsShown.forEach((v, id) => { const li = document.createElement("li"); li.textContent = `${id} · v${v}`; ul.appendChild(li); });
+  }
+
+  // ---------- parsing ----------
+  function parseIncome(raw) {
+    const s = raw.trim();
+    if (!s) return { err: "Enter an amount in euros, for example 1.850." };
+    if (/\d\s*[-–—]\s*\d/.test(s) || /\bto\b|\bbis\b/i.test(s)) return { err: "Enter one amount. If you're not sure, use the lower one." };
+    const compact = s.replace(/€|eur(o)?/gi, "").replace(/\s+/g, "");
+    if (/^-/.test(compact)) return { err: "Enter an amount of 0 or more." };
+    if (/[^0-9.,]/.test(compact) || !/\d/.test(compact)) return { err: "Enter an amount in euros, for example 1.850." };
+    let n;
+    if (/,\d{1,2}$/.test(compact)) n = compact.replace(/,\d{1,2}$/, "").replace(/[.,]/g, "");      // 1.850,50
+    else if (/\.\d{1,2}$/.test(compact)) n = compact.replace(/\.\d{1,2}$/, "").replace(/[.,]/g, ""); // 1850.50
+    else n = compact.replace(/[.,]/g, "");                                                          // 1.850 / 1,850
+    const value = parseInt(n, 10);
+    if (Number.isNaN(value)) return { err: "Enter an amount in euros, for example 1.850." };
+    return { value, high: value > MAX_INCOME };
+  }
+
+  // ---------- screens ----------
+  function show(name) {
+    const leavingIncome = onIncome && name !== "income";
+    if (leavingIncome && !state.submitted) track("income_step_abandoned", { to: name });
+    onIncome = name === "income";
+    document.querySelectorAll(".screen").forEach(s => s.classList.toggle("active", s.id === "screen-" + name));
+    textsShown = new Map();
+    if (name === "overview") renderOverview();
+    if (name === "income") renderIncome();
+    if (name === "done") renderDone();
+    refreshShownList();
+    const first = document.querySelector(".screen.active h1, .screen.active label.q");
+    if (first) first.setAttribute("tabindex", "-1"), first.focus({ preventScroll: true });
+  }
+
+  function renderOverview() {
+    const box = $("claims"); box.innerHTML = "";
+    CASE.claims.forEach(c => {
+      const d = document.createElement("div"); d.className = "claim";
+      d.innerHTML = `<div><b></b><span></span></div><div class="amt"></div>`;
+      d.querySelector("b").textContent = c.creditor + " (fictional)";
+      d.querySelector("span").textContent = "Reference " + c.ref;
+      d.querySelector(".amt").textContent = eur(c.amountCents);
+      box.appendChild(d);
+    });
+    $("total").textContent = eur(CASE.claims.reduce((a, c) => a + c.amountCents, 0));
+  }
+
+  function renderIncome() {
+    state.submitted = false;
+    const ok = renderTexts($("screen-income")) && REQUIRED_ON_INCOME.every(id => approved(id));
+    $("blocked").hidden = ok;
+    $("income").disabled = !ok || state.noIncome;
+    $("no-income").disabled = !ok;
+    if (!ok) { $("continue").disabled = true; track("income_step_blocked", { missing: REQUIRED_ON_INCOME.filter(id => !approved(id)) }); return; }
+    $("no-income").checked = state.noIncome;
+    if (state.value != null && !state.noIncome) $("income").value = eurWhole(state.value).replace(" €", "");
+    validate(false);
+    track("income_step_viewed");
+  }
+
+  function validate(showErrors = true) {
+    const input = $("income"), err = $("income-err"), field = $("field");
+    let valid = false, value = null;
+    $("confirm-high-wrap").hidden = true;
+    if (state.noIncome) { valid = true; value = 0; err.textContent = ""; field.classList.remove("invalid"); }
+    else {
+      const r = parseIncome(input.value);
+      if (r.err) { err.textContent = showErrors && input.value.trim() ? r.err : ""; field.classList.toggle("invalid", showErrors && !!input.value.trim()); }
+      else {
+        err.textContent = ""; field.classList.remove("invalid"); value = r.value;
+        if (r.high) { $("confirm-high-wrap").hidden = false; err.textContent = "That's a very high monthly amount. Please check it."; valid = $("confirm-high").checked; }
+        else valid = true;
+      }
+    }
+    const lowIncome = value != null && (value === 0 || value < LOW_INCOME_THRESHOLD);
+    $("support").hidden = !lowIncome;
+    if (lowIncome) { const t = approved("TXT-INCOME-SUPPORT"); if (t) textsShown.set("TXT-INCOME-SUPPORT", t.version); }
+    else textsShown.delete("TXT-INCOME-SUPPORT");
+    refreshShownList();
+    $("continue").disabled = !valid || !$("blocked").hidden;
+    return valid ? value : null;
+  }
+
+  function renderDone() {
+    renderTexts($("screen-done"));
+    $("done-amount").textContent = state.noIncome ? "No income right now" : eurWhole(state.value);
+    const low = state.noIncome || state.value < LOW_INCOME_THRESHOLD;
+    $("done-support").hidden = !low;
+    textsShown = new Map(); renderTexts($("screen-done")); // recount after visibility change
+  }
+
+  // ---------- wiring ----------
+  $("who").textContent = CASE.consumer;
+  $("threshold-note").textContent = `Low-income support line shows below ${eurWhole(LOW_INCOME_THRESHOLD)} (placeholder, from Collections policy). Max ${eurWhole(MAX_INCOME)}.`;
+
+  $("start").addEventListener("click", () => { location.hash = "income"; });
+  $("income").addEventListener("input", () => validate(true));
+  $("income").addEventListener("blur", () => {
+    const r = parseIncome($("income").value);
+    if (!r.err) $("income").value = eurWhole(r.value).replace(" €", ""); // show the cleaned value back
+    validate(true);
+  });
+  $("confirm-high").addEventListener("change", () => validate(true));
+  $("no-income").addEventListener("change", e => {
+    state.noIncome = e.target.checked; $("income").disabled = state.noIncome; save(); validate(true);
+  });
+  $("counts").addEventListener("toggle", e => {
+    if (e.target.open) { const t = approved("TXT-INCOME-COUNTS"); if (t) textsShown.set("TXT-INCOME-COUNTS", t.version); refreshShownList(); track("income_why_expanded"); }
+  });
+  $("continue").addEventListener("click", () => {
+    const v = validate(true); if (v == null) return;
+    state.value = v; state.submitted = true; save();
+    track("income_submitted", { income_band: state.noIncome ? "none" : v < LOW_INCOME_THRESHOLD ? "below_threshold" : "at_or_above_threshold" });
+    location.hash = "done";
+  });
+  $("person-toggle").addEventListener("click", e => {
+    const open = $("person").classList.toggle("open"); e.target.setAttribute("aria-expanded", open);
+  });
+  $("change").addEventListener("click", () => { location.hash = "income"; });
+  $("to-plans").addEventListener("click", () => { location.hash = "plans"; });
+  $("restart").addEventListener("click", () => { location.hash = "overview"; });
+
+  $("sim-missing").addEventListener("change", e => { simulateMissing = e.target.checked; show(currentRoute()); });
+  $("reset").addEventListener("click", () => {
+    try { localStorage.removeItem(STORE); } catch (e) {}
+    state = { value: null, noIncome: false, submitted: false };
+    $("income").value = ""; $("events").innerHTML = ""; $("sim-missing").checked = false; simulateMissing = false;
+    location.hash = "overview"; show("overview");
+  });
+
+  const ROUTES = ["overview", "income", "done", "plans"];
+  function currentRoute() {
+    const r = location.hash.replace("#", "");
+    if (r === "done" && state.value == null && !state.noIncome) return "income";
+    return ROUTES.includes(r) ? r : "overview";
+  }
+  window.addEventListener("hashchange", () => show(currentRoute()));
+  window.addEventListener("pagehide", () => { if (onIncome && !state.submitted) track("income_step_abandoned", { to: "left_page" }); });
+
+  load();
+  show(currentRoute());
+</script>
+</body>
+</html>
