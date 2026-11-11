@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BU Collection Roadmap</title>
+<style>
+  :root {
+    --bg: #f6f5f1; --surface: #ffffff; --ink: #1c1f1a; --muted: #5d6459; --line: #e4e2da;
+    --accent: #1e3111; --accent-2: #4f7a3a;
+    --qw: #2f7d4a; --qw-bg: #e3f2e7;
+    --mp: #3b5fa8; --mp-bg: #e4ebf8;
+    --fi: #8a6d1f; --fi-bg: #f6efd9;
+    --ts: #a8432f; --ts-bg: #f8e4df;
+    --drop: #eef3ea;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #121410; --surface: #1b1e18; --ink: #ecefe8; --muted: #a3ab9e; --line: #2e3329;
+      --accent: #b9d8a4; --accent-2: #8fbf74;
+      --qw: #8fd3a3; --qw-bg: #1f3326; --mp: #9db8ef; --mp-bg: #1e2a40;
+      --fi: #e5c66e; --fi-bg: #332d18; --ts: #f0a08e; --ts-bg: #3a221c; --drop: #222c1f;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #121410; --surface: #1b1e18; --ink: #ecefe8; --muted: #a3ab9e; --line: #2e3329;
+    --accent: #b9d8a4; --accent-2: #8fbf74;
+    --qw: #8fd3a3; --qw-bg: #1f3326; --mp: #9db8ef; --mp-bg: #1e2a40;
+    --fi: #e5c66e; --fi-bg: #332d18; --ts: #f0a08e; --ts-bg: #3a221c; --drop: #222c1f;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif; }
+  .page { max-width: 1200px; margin: 0 auto; padding: 36px 24px 48px; }
+
+  header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 16px; margin-bottom: 20px; }
+  .eyebrow { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent-2); font-weight: 600; }
+  h1 { font-size: 30px; margin: 6px 0 4px; letter-spacing: -.01em; }
+  .team { color: var(--muted); }
+  .controls { display: flex; flex-wrap: wrap; gap: 6px; }
+  .controls button { font: inherit; font-size: 12.5px; border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+    border-radius: 999px; padding: 6px 12px; cursor: pointer; }
+  .controls button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .controls .reset { color: var(--muted); }
+
+  .anchors { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 24px; }
+  .anchors div { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 11px 13px; font-size: 13px; }
+  .anchors b { display: block; font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 3px; }
+
+  .lanes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .lane { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 14px; min-height: 220px; display: flex; flex-direction: column; }
+  .lane h2 { margin: 0; font-size: 15px; letter-spacing: .06em; }
+  .lane .sub { color: var(--muted); font-size: 12.5px; margin: 2px 0 12px; display: flex; justify-content: space-between; }
+  .lane[data-lane="now"] h2 { color: var(--qw); }
+  .lane[data-lane="next"] h2 { color: var(--mp); }
+  .lane[data-lane="later"] h2 { color: var(--fi); }
+  .drop { flex: 1; display: flex; flex-direction: column; gap: 10px; border-radius: 12px; padding: 2px; transition: background .15s; }
+  .drop.over { background: var(--drop); outline: 2px dashed var(--accent-2); outline-offset: 2px; }
+
+  .card { background: var(--bg); border: 1px solid var(--line); border-left: 4px solid var(--q); border-radius: 12px; padding: 12px 13px;
+    cursor: grab; transition: transform .12s, box-shadow .12s; }
+  .card:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(0,0,0,.07); }
+  .card.dragging { opacity: .45; }
+  .card.dim { opacity: .25; }
+  .card .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .card .id { font-size: 11px; font-weight: 700; color: var(--muted); }
+  .card h3 { margin: 2px 0 6px; font-size: 14.5px; line-height: 1.3; }
+  .card p { margin: 0 0 8px; color: var(--muted); font-size: 13px; }
+  .badge { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px; white-space: nowrap; color: var(--q); background: var(--qb); }
+  .scores { display: flex; gap: 12px; font-size: 12px; color: var(--muted); }
+  .scores span b { color: var(--ink); }
+  .move { display: flex; gap: 4px; margin-top: 8px; }
+  .move button { font: inherit; font-size: 11px; border: 1px solid var(--line); background: var(--surface); color: var(--muted);
+    border-radius: 6px; padding: 2px 7px; cursor: pointer; }
+  .move button:hover { color: var(--ink); border-color: var(--ink); }
+
+  .q-qw { --q: var(--qw); --qb: var(--qw-bg); }
+  .q-mp { --q: var(--mp); --qb: var(--mp-bg); }
+  .q-fi { --q: var(--fi); --qb: var(--fi-bg); }
+  .q-ts { --q: var(--ts); --qb: var(--ts-bg); }
+
+  .cut { margin-top: 20px; background: var(--surface); border: 1px dashed var(--ts); border-radius: 16px; padding: 14px; }
+  .cut h2 { margin: 0; font-size: 15px; color: var(--ts); letter-spacing: .06em; }
+  .cut .drop { flex-direction: row; flex-wrap: wrap; min-height: 60px; margin-top: 10px; }
+  .cut .card { flex: 1 1 280px; max-width: 380px; }
+  .cut .card h3 { text-decoration: line-through; text-decoration-thickness: 1px; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 22px; font-size: 12.5px; color: var(--muted); }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .legend i { width: 10px; height: 10px; border-radius: 3px; background: var(--q); display: inline-block; }
+  footer { margin-top: 22px; font-size: 12px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; }
+
+  @media (max-width: 900px) {
+    .anchors { grid-template-columns: 1fr 1fr; }
+    .lanes { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 520px) {
+    .page { padding: 24px 16px 36px; }
+    .anchors { grid-template-columns: 1fr; }
+    h1 { font-size: 24px; }
+  }
+  @media print { .controls, .move { display: none; } body { background: #fff; } }
+</style>
+</head>
+<body>
+<main class="page">
+  <header>
+    <div>
+      <div class="eyebrow">BU Collection · A Fair Way Forward · Module 4</div>
+      <h1>Feature roadmap</h1>
+      <div class="team">Team: 1 PM · 1 architect · 2 front-end devs · 1 back-end dev · 5-week sprint</div>
+    </div>
+    <div class="controls" role="group" aria-label="Filter by quadrant">
+      <button data-filter="all" aria-pressed="true">All</button>
+      <button data-filter="qw" aria-pressed="false">Quick Win</button>
+      <button data-filter="mp" aria-pressed="false">Major Project</button>
+      <button data-filter="fi" aria-pressed="false">Fill-In</button>
+      <button data-filter="ts" aria-pressed="false">Time Sinker</button>
+      <button class="reset" id="reset">Reset layout</button>
+    </div>
+  </header>
+
+  <section class="anchors" aria-label="Strategic anchors">
+    <div><b>Persona</b>Mara, shift worker with two open claims, on her phone during short breaks.</div>
+    <div><b>Primary metric</b>Kept plans per multi-claim starter: 27.4% → 32.4%.</div>
+    <div><b>Moment of misery</b>Unclear income question, one claim at a time, shortest plan breaks.</div>
+    <div><b>Guardrail</b>60-day missed-payment rate ≤ 19.0%.</div>
+  </section>
+
+  <section class="lanes">
+    <div class="lane" data-lane="now"><h2>NOW</h2><div class="sub"><span>This sprint</span><span class="count"></span></div><div class="drop" data-lane="now"></div></div>
+    <div class="lane" data-lane="next"><h2>NEXT</h2><div class="sub"><span>The following sprints</span><span class="count"></span></div><div class="drop" data-lane="next"></div></div>
+    <div class="lane" data-lane="later"><h2>LATER</h2><div class="sub"><span>Backlog</span><span class="count"></span></div><div class="drop" data-lane="later"></div></div>
+  </section>
+
+  <section class="cut">
+    <h2>✂ CUT LIST</h2>
+    <div class="drop" data-lane="cut"></div>
+  </section>
+
+  <div class="legend">
+    <span class="q-qw"><i></i>Quick Win · high value, low effort</span>
+    <span class="q-mp"><i></i>Major Project · high value, high effort</span>
+    <span class="q-fi"><i></i>Fill-In · low value, low effort</span>
+    <span class="q-ts"><i></i>Time Sinker · low value, high effort</span>
+    <span>Drag cards between lanes, or use the arrows.</span>
+  </div>
+
+  <footer>Product School workshop · All people, numbers and events are fictional sample data, not Riverty research.</footer>
+</main>
+
+<script>
+  const FEATURES = [
+    { id: "B2", name: "Plain explainer for why income is asked and how it is used", rationale: "Very quick win for static text.", value: 5, effort: 1, lane: "now" },
+    { id: "B4", name: "Handoff summary for the agent when a consumer calls", rationale: "It's easy, I'd say.", value: 3, effort: 1, lane: "now" },
+    { id: "B6", name: "Pick a payment date that matches pay day", rationale: "Shift workers miss 22.5% of payments vs 17.4%; a due date after payday protects keeping, and it's cheap.", value: 4, effort: 1, lane: "now" },
+    { id: "B1", name: "One plan for several open claims", rationale: "Big game.", value: 5, effort: 5, lane: "next" },
+    { id: "B3", name: "Affordability check before the plan options", rationale: "Big game.", value: 5, effort: 4, lane: "next" },
+    { id: "B5", name: "Photo upload that works on mobile, or skip the document under a set amount", rationale: "I believe this would have medium impact.", value: 3, effort: 1, lane: "later" },
+    { id: "B8", name: "Chat assistant on every portal page", rationale: "Chat users miss more payments (21.6% vs 18.3%); more entry points widen reach without fixing the moment of misery.", value: 4, effort: 5, lane: "later" },
+    { id: "B7", name: "Show the shortest plan first to raise recovery", rationale: "Raised missed payments 3.4 pts with no gain in kept plans (37.3% → 37.3%); breaks the guardrail.", value: 1, effort: 1, lane: "cut" },
+  ];
+  const ORDER = ["now", "next", "later", "cut"];
+  const LABEL = { qw: "Quick Win", mp: "Major Project", fi: "Fill-In", ts: "Time Sinker" };
+  const KEY = "bu-collection-roadmap-v1";
+
+  const quadrant = f => (f.value >= 4 ? (f.effort <= 2 ? "qw" : "mp") : (f.effort <= 2 ? "fi" : "ts"));
+
+  function load() {
+    try { const saved = JSON.parse(localStorage.getItem(KEY) || "null");
+      if (saved) FEATURES.forEach(f => { if (saved[f.id]) f.lane = saved[f.id]; }); } catch (e) {}
+  }
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(Object.fromEntries(FEATURES.map(f => [f.id, f.lane])))); } catch (e) {}
+  }
+
+  let filter = "all";
+  function render() {
+    document.querySelectorAll(".drop").forEach(d => d.innerHTML = "");
+    FEATURES.forEach(f => {
+      const q = quadrant(f);
+      const el = document.createElement("article");
+      el.className = `card q-${q}` + (filter !== "all" && filter !== q ? " dim" : "");
+      el.draggable = true; el.dataset.id = f.id;
+      const i = ORDER.indexOf(f.lane);
+      el.innerHTML = `
+        <div class="top"><span class="id">${f.id}</span><span class="badge">${LABEL[q]}</span></div>
+        <h3>${f.name}</h3>
+        <p>${f.rationale}</p>
+        <div class="scores"><span>Value <b>${f.value}</b>/5</span><span>Effort <b>${f.effort}</b>/5</span></div>
+        <div class="move">
+          ${i > 0 ? `<button data-dir="-1" aria-label="Move ${f.id} to ${ORDER[i-1]}">← ${ORDER[i-1].toUpperCase()}</button>` : ""}
+          ${i < ORDER.length - 1 ? `<button data-dir="1" aria-label="Move ${f.id} to ${ORDER[i+1]}">${ORDER[i+1].toUpperCase()} →</button>` : ""}
+        </div>`;
+      document.querySelector(`.drop[data-lane="${f.lane}"]`).appendChild(el);
+    });
+    document.querySelectorAll(".lane").forEach(l => {
+      const n = FEATURES.filter(f => f.lane === l.dataset.lane).length;
+      l.querySelector(".count").textContent = `${n} feature${n === 1 ? "" : "s"}`;
+    });
+  }
+
+  document.addEventListener("click", e => {
+    const b = e.target.closest(".move button");
+    if (b) {
+      const f = FEATURES.find(x => x.id === b.closest(".card").dataset.id);
+      f.lane = ORDER[ORDER.indexOf(f.lane) + Number(b.dataset.dir)];
+      save(); render(); return;
+    }
+    const fb = e.target.closest("[data-filter]");
+    if (fb) {
+      filter = fb.dataset.filter;
+      document.querySelectorAll("[data-filter]").forEach(x => x.setAttribute("aria-pressed", x === fb));
+      render();
+    }
+  });
+  document.getElementById("reset").addEventListener("click", () => {
+    try { localStorage.removeItem(KEY); } catch (e) {}
+    location.reload();
+  });
+
+  let dragId = null;
+  document.addEventListener("dragstart", e => {
+    const c = e.target.closest(".card"); if (!c) return;
+    dragId = c.dataset.id; c.classList.add("dragging");
+    e.dataTransfer.effectAllowed = "move";
+  });
+  document.addEventListener("dragend", e => {
+    const c = e.target.closest(".card"); if (c) c.classList.remove("dragging");
+    document.querySelectorAll(".drop.over").forEach(d => d.classList.remove("over"));
+  });
+  document.querySelectorAll(".drop").forEach(d => {
+    d.addEventListener("dragover", e => { e.preventDefault(); d.classList.add("over"); });
+    d.addEventListener("dragleave", () => d.classList.remove("over"));
+    d.addEventListener("drop", e => {
+      e.preventDefault(); d.classList.remove("over");
+      const f = FEATURES.find(x => x.id === dragId);
+      if (f) { f.lane = d.dataset.lane; save(); render(); }
+    });
+  });
+
+  load(); render();
+</script>
+</body>
+</html>
