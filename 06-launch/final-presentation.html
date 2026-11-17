@@ -1,0 +1,635 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Demystifying the Income Question</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #282828;
+    --grey: #686868;
+    --grey-300: #c9c9c9;
+    --grey-100: #e7e4e2;
+    --paper: #f3f1f0;
+    --soft: #f7f6f4;
+    --white: #ffffff;
+    --forest: #527a42;
+    --forest-deep: #1e2b18;
+    --sage: #86a27b;
+    --sage-tint: #e3eddd;
+    --coral: #ef706b;
+    --coral-tint: #fbe4e2;
+    --coral-deep: #c4524d;
+
+    /* Names the slide markup uses, mapped onto the palette */
+    --bg: var(--white);
+    --fg: var(--ink);
+    --muted: var(--grey);
+    --orange: var(--forest);
+    --orange-soft: var(--forest);
+    --cyan: var(--forest);
+    --teal: var(--forest);
+    --blue: var(--sage);
+    --violet: var(--grey);
+    --pink: var(--coral);
+    --line: var(--grey-100);
+    --card: var(--white);
+
+    --sans: "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: var(--sans);
+    color-scheme: light;
+  }
+  /* One type scale that tracks the smaller of width and height, so a 16:9 slide fits at 1280x720 and 1920x1080 alike */
+  html { font-size: clamp(10px, min(1.06vw, 1.9vh), 21px); scroll-snap-type: y mandatory; scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--white); color: var(--ink); font-family: var(--sans); line-height: 1.4; -webkit-font-smoothing: antialiased; font-variant-numeric: tabular-nums; }
+
+  section {
+    min-height: 100vh; scroll-snap-align: start; position: relative;
+    padding: 4rem 5.5rem 3.2rem 4.5rem; display: flex; flex-direction: column; justify-content: center; gap: 1.05rem;
+    background: var(--white);
+  }
+  section.soft { background: var(--soft); }
+  section + section { border-top: 1px solid var(--grey-100); }
+  .eyebrow { text-transform: uppercase; letter-spacing: 0.16em; color: var(--forest); font-size: 0.7rem; font-weight: 700; }
+  h1, h2, h3 { margin: 0; text-wrap: balance; }
+  h2 { font-size: 2.3rem; line-height: 1.08; letter-spacing: -0.03em; font-weight: 700; }
+  h3 { font-size: 1rem; font-weight: 700; }
+  p { margin: 0; }
+  b { font-weight: 700; }
+  .muted { color: var(--grey); }
+  .small { font-size: 0.86rem; }
+  .xs { font-size: 0.76rem; }
+
+  .card { background: var(--white); border: 1px solid var(--grey-100); border-radius: 16px; padding: 1rem 1.15rem; min-width: 0; box-shadow: 0 10px 24px -20px rgba(40,40,40,0.55); }
+  .card.hero { background: rgba(227,237,221,0.6); border: 2px solid var(--forest); box-shadow: none; }
+  .card .label { text-transform: uppercase; letter-spacing: 0.16em; font-size: 0.62rem; font-weight: 700; color: var(--grey); margin-bottom: 0.45rem; display: block; }
+  .card.hero .label { color: var(--forest); }
+  .grid { display: grid; gap: 0.9rem; min-height: 0; }
+  .g2 { grid-template-columns: 1fr 1fr; }
+  .g3 { grid-template-columns: repeat(3, 1fr); }
+  .g4 { grid-template-columns: repeat(4, 1fr); }
+  .fill { align-items: start; }
+  .fill > .grid { align-content: start; }
+  ul.clean { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.35rem; }
+  ol.steps { margin: 0; padding-left: 1.3rem; display: flex; flex-direction: column; gap: 0.3rem; }
+  ol.steps li::marker { color: var(--forest); font-weight: 800; }
+  .tag { font-size: 0.62rem; font-weight: 700; color: var(--grey); background: var(--white); border: 1px solid var(--grey-300); border-radius: 999px; padding: 0.05rem 0.45rem; white-space: nowrap; }
+  .pill { display: inline-flex; align-items: center; gap: 0.4rem; border-radius: 999px; padding: 0.3rem 0.8rem; font-size: 0.8rem; font-weight: 700; border: 1.5px solid currentColor; background: var(--white); }
+  .callout { background: var(--forest); color: var(--white); border-radius: 16px; padding: 1rem 1.35rem; }
+  .callout .eyebrow { color: rgba(255,255,255,0.75); }
+  .callout p { font-size: 1.02rem; line-height: 1.45; font-weight: 500; }
+  .callout b { font-weight: 800; }
+  .quote { font-style: italic; }
+  .kpi { font-size: 2.5rem; font-weight: 800; line-height: 1; letter-spacing: -0.035em; }
+  .kpi-sub { font-size: 0.8rem; color: var(--grey); margin-top: 0.4rem; font-weight: 500; }
+  .slide-no { position: absolute; left: 4.5rem; bottom: 1.2rem; font-size: 0.66rem; font-weight: 700; color: var(--grey); letter-spacing: 0.16em; opacity: 0.7; }
+  a { color: var(--forest-deep); text-underline-offset: 3px; }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--forest); outline-offset: 3px; border-radius: 6px; }
+
+  /* Cover */
+  .cover { justify-content: center; gap: 1.5rem; }
+  .cover h1 { font-size: 4.2rem; line-height: 1.03; letter-spacing: -0.035em; font-weight: 700; max-width: 18ch; }
+  .cover h1 span { color: var(--forest); }
+  .cover .pitch { font-size: 1.3rem; color: var(--grey); max-width: 52ch; font-weight: 500; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; }
+  .chip { font-size: 0.78rem; font-weight: 600; border: 1px solid var(--grey-300); border-radius: 999px; padding: 0.35rem 0.85rem; background: var(--white); }
+  .chip.proto { border: 1.5px dashed var(--forest); background: var(--sage-tint); color: var(--ink); }
+
+  /* Journey strip and the feelings line above it */
+  .journey { display: grid; grid-template-columns: repeat(8, 1fr); gap: 0.5rem; }
+  .stage { border: 1px solid var(--grey-100); border-radius: 12px; padding: 0.55rem 0.6rem; background: var(--white); min-width: 0; }
+  .stage .n { font-size: 0.6rem; font-weight: 700; color: var(--grey); }
+  .stage b { display: block; font-size: 0.86rem; margin: 0.1rem 0 0.25rem; font-weight: 800; }
+  .stage .today { font-size: 0.72rem; color: var(--coral-deep); font-weight: 600; }
+  .stage .fix { font-size: 0.72rem; color: var(--forest); margin-top: 0.15rem; font-weight: 600; }
+  .stage.misery { border: 1.5px solid var(--coral); background: var(--coral-tint); }
+  .stage.misery .flag { font-size: 0.56rem; font-weight: 800; letter-spacing: 0.08em; color: var(--white); background: var(--coral); border-radius: 999px; padding: 0.05rem 0.4rem; display: inline-block; margin-bottom: 0.15rem; }
+  .journey-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.3rem; gap: 1rem; }
+  .legend { display: inline-flex; gap: 1rem; align-items: center; font-size: 0.7rem; font-weight: 600; color: var(--grey); margin-left: auto; }
+  .legend i { display: inline-block; width: 1.4rem; height: 0; border-top: 2px solid var(--grey); vertical-align: middle; margin-right: 0.35rem; }
+  .legend i.fixed { border-top: 2px dashed var(--forest); }
+  .mood { position: relative; height: 4.4rem; margin-bottom: 0.35rem; }
+  .mood svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .mood .dot { position: absolute; width: 0.6rem; height: 0.6rem; border-radius: 50%; background: var(--grey); border: 2px solid var(--white); transform: translate(-50%, -50%); }
+  .mood .dot.fix { background: var(--forest); }
+  .mood .dot.low { width: 1.05rem; height: 1.05rem; background: var(--coral); box-shadow: 0 0 0 4px rgba(239,112,107,0.2); }
+
+  /* Roadmap lanes */
+  .lanes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.7rem; }
+  .lane { border-radius: 14px; border: 1px solid var(--grey-100); border-top: 4px solid var(--lc); padding: 0.75rem; background: var(--paper); display: flex; flex-direction: column; gap: 0.45rem; min-width: 0; }
+  .lane.later { border: 1.5px dashed var(--grey-300); border-top: 4px dashed var(--grey-300); background: var(--white); }
+  .lane h3 { font-size: 0.7rem; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 800; }
+  .feat { border-radius: 10px; padding: 0.45rem 0.55rem; background: var(--white); border-left: 4px solid var(--c); font-size: 0.8rem; box-shadow: 0 6px 14px -12px rgba(40,40,40,0.6); }
+  .feat .id { color: var(--ink); font-weight: 800; margin-right: 0.3rem; }
+  .lane.later .feat { border-left-style: dashed; box-shadow: none; background: var(--soft); }
+  .feat.cut { text-decoration: line-through; text-decoration-color: var(--coral); color: var(--grey); border-left-style: dashed; box-shadow: none; }
+  .feat.selected { background: var(--sage-tint); box-shadow: 0 0 0 2px var(--forest); }
+  .tag.sel { color: var(--white); background: var(--forest); border-color: var(--forest); }
+  .feat .tag { margin-left: 0.3rem; }
+
+  /* Validation */
+  .metric-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.6rem; }
+  .metric { border: 1px solid var(--grey-100); border-radius: 12px; padding: 0.6rem 0.7rem; background: var(--white); min-width: 0; }
+  .metric .v { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.02em; }
+  .metric .k { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--grey); }
+  .decide { display: flex; flex-direction: column; }
+  .fork-pill { align-self: center; font-size: 0.74rem; font-weight: 800; color: var(--white); background: var(--ink); border-radius: 999px; padding: 0.3rem 0.95rem; }
+  .fork { display: block; width: 100%; height: 2.4rem; overflow: visible; }
+  .rules { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem; }
+  .rule { border-radius: 12px; padding: 0.65rem 0.8rem; border: 1.5px solid; background: var(--white); font-size: 0.8rem; }
+  .rule b { letter-spacing: 0.14em; text-transform: uppercase; font-size: 0.7rem; font-weight: 800; display: block; margin-bottom: 0.2rem; }
+  .rule.ship { border-color: var(--forest); background: var(--sage-tint); }
+  .rule.iterate { border-color: var(--sage); border-style: dashed; }
+  .rule.kill { border-color: var(--coral); background: var(--coral-tint); }
+
+  /* Launch */
+  .dash { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.7rem; }
+  .tile { border-radius: 14px; padding: 0.85rem 0.95rem; border: 1px solid var(--grey-100); background: var(--white); box-shadow: 0 10px 24px -20px rgba(40,40,40,0.55); min-width: 0; }
+  .tile .k { font-size: 0.62rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; }
+  .tile .v { font-size: 1.55rem; font-weight: 800; letter-spacing: -0.02em; margin: 0.25rem 0; }
+  .timeline { position: relative; display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.5rem; padding-top: 1.5rem; }
+  .tl-line { position: absolute; top: 0.48rem; left: 0.45rem; right: 1rem; height: 2.5px; background: var(--forest); border-radius: 2px; transform-origin: left center; }
+  .tl-line::after { content: ""; position: absolute; right: -0.15rem; top: 50%; width: 0.5rem; height: 0.5rem; border-top: 2.5px solid var(--forest); border-right: 2.5px solid var(--forest); transform: translateY(-50%) rotate(45deg); }
+  .tl { position: relative; font-size: 0.76rem; min-width: 0; font-weight: 500; }
+  .tl::before { content: ""; position: absolute; top: -1.5rem; left: 0; width: 0.95rem; height: 0.95rem; border-radius: 50%; background: var(--forest); border: 2.5px solid var(--white); box-shadow: 0 0 0 1px var(--forest); }
+  .tl.warn::before { background: var(--coral); box-shadow: 0 0 0 1px var(--coral); }
+  .tl.later::before { background: var(--white); border: 2px dashed var(--forest); box-shadow: none; }
+  .tl b { font-size: 0.66rem; font-weight: 800; color: var(--forest); display: block; letter-spacing: 0.1em; }
+  .tl.warn b { color: var(--coral-deep); }
+  .bad { border: 1.5px solid var(--coral); background: var(--coral-tint); border-radius: 14px; padding: 0.8rem 1rem; }
+  .bad .label { color: var(--coral-deep); display: block; margin-bottom: 0.3rem; }
+
+  /* Story */
+  .aha { display: grid; grid-template-columns: 1.45fr 1fr; gap: 0.9rem; align-items: stretch; }
+  .aha .callout { display: flex; flex-direction: column; justify-content: center; }
+  .trap svg { display: block; width: 100%; height: 8.6rem; overflow: visible; }
+
+  /* Thank you */
+  .thanks { justify-content: center; align-items: flex-start; gap: 1.4rem; }
+  .thanks h2 { font-size: 4.2rem; letter-spacing: -0.035em; }
+  .submit { display: inline-flex; align-items: center; gap: 0.6rem; background: var(--forest); color: var(--white); font-weight: 800; border-radius: 999px; padding: 0.75rem 1.4rem; font-size: 1.05rem; box-shadow: 0 14px 30px -14px rgba(82,122,66,0.8); }
+
+  /* Chrome: progress + dots */
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0; background: var(--forest); z-index: 20; }
+  #dots { position: fixed; right: 1.4rem; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 0.7rem; z-index: 20; }
+  #dots button { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--grey-300); background: var(--white); padding: 0; cursor: pointer; transition: transform .2s, background .2s; }
+  #dots button.on { background: var(--forest); border-color: var(--forest); transform: scale(1.3); }
+  #dots button span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .hint { position: fixed; right: 1.4rem; bottom: 1rem; font-size: 0.62rem; font-weight: 600; color: var(--grey); opacity: 0.6; z-index: 20; }
+
+  /* Builds: each slide plays in reading order the first time it comes into view */
+  .js .r { opacity: 0; transform: translateY(10px); transition: opacity .45s ease-out, transform .45s ease-out; transition-delay: var(--d, 0ms); }
+  .js section.in .r { opacity: 1; transform: none; }
+  .js .draw { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset .9s ease-in-out; transition-delay: var(--d, 0ms); }
+  .js section.in .draw { stroke-dashoffset: 0; }
+  .js .fade { opacity: 0; transition: opacity .6s ease-out; transition-delay: var(--d, 0ms); }
+  .js section.in .fade { opacity: 1; }
+  .js .pop { transform: translate(-50%, -50%) scale(0); transition: transform .35s cubic-bezier(.34,1.8,.64,1); transition-delay: var(--d, 0ms); }
+  .js section.in .pop { transform: translate(-50%, -50%) scale(1); }
+  .js .tl-line { transform: scaleX(0); transition: transform 1.1s ease-in-out; transition-delay: var(--d, 0ms); }
+  .js section.in .tl-line { transform: scaleX(1); }
+  @media (prefers-reduced-motion: reduce) {
+    .js .r, .js .draw, .js .fade, .js .pop, .js .tl-line { transition: none !important; }
+  }
+
+  /* Print / PDF export: show every build, one slide per page */
+  @media print {
+    .js .r, .js .fade, .js .draw, .js .pop, .js .tl-line { opacity: 1 !important; transform: none !important; stroke-dashoffset: 0 !important; transition: none !important; }
+    .js .mood .pop { transform: translate(-50%, -50%) !important; }
+    section { break-after: page; }
+    #progress, #dots, .hint { display: none; }
+  }
+
+  @media (max-width: 900px) {
+    html { font-size: 14px; scroll-snap-type: none; }
+    section { padding: 3rem 1.25rem 2.5rem; }
+    .g2, .g3, .g4, .lanes, .dash, .rules, .aha { grid-template-columns: 1fr; }
+    .metric-row, .timeline { grid-template-columns: 1fr 1fr; }
+    .journey { grid-template-columns: 1fr 1fr; }
+    .mood, .fork, .tl-line, .legend { display: none; }
+    .cover h1 { font-size: 2.6rem; }
+    #dots, .hint { display: none; }
+    .slide-no { left: 1.25rem; }
+  }
+</style>
+</head>
+<body>
+<div id="progress" aria-hidden="true"></div>
+<nav id="dots" aria-label="Slides"></nav>
+<div class="hint" aria-hidden="true">↑ ↓ · Space · Home / End</div>
+
+<main>
+
+<!-- 1 · Cover -->
+<section class="cover soft" id="s-cover" data-title="Cover">
+  <div class="eyebrow">Product School · Final Project · Riverty BU Collection · A Fair Way Forward</div>
+  <h1>Demystifying the <span>income question</span></h1>
+  <p class="pitch">People who can't pay in full give up on their instalment plan at one unclear question. This project makes it clear: which figure to give, why we ask, and who sees it.</p>
+  <div class="meta-row">
+    <span class="chip">Karan · PM Cohort · Nov 2026</span>
+    <span class="chip"><a href="https://github.com/karanmody-riverty/pm-final-project-riverty-km1">github.com/karanmody-riverty/pm-final-project-riverty-km1</a></span>
+    <span class="chip proto">Prototype · 04-roadmap/prototype.html</span>
+  </div>
+  <div class="grid g3" style="max-width: 62rem; margin-top: 0.6rem">
+    <div class="card hero"><div class="kpi" style="color:var(--coral-deep)" data-count="19.3" data-dec="1" data-suffix="%">19.3%</div><div class="kpi-sub">of people who reach the income question leave there: 1,421 a month</div></div>
+    <div class="card"><div class="kpi" data-count="52" data-suffix="%">52%</div><div class="kpi-sub">of agent contacts are three questions the portal never answers</div></div>
+    <div class="card"><div class="kpi" style="color:var(--coral-deep)">1 in 5</div><div class="kpi-sub">plans that do get created break within 60 days</div></div>
+  </div>
+  <div class="slide-no">01 / 08</div>
+</section>
+
+<!-- 2 · Strategy -->
+<section id="s-strategy" data-title="Strategy">
+  <div class="eyebrow">Strategy</div>
+  <h2>We pay twice for one confusing journey</h2>
+  <div class="grid g2">
+    <div class="card hero"><span class="label">Problem hook</span>
+      <p>Half of agent contacts after an online plan attempt are questions the portal never answers, and one in five plans consumers agree to breaks within 60 days. We pay twice: in agent time, and again in failed recovery.</p></div>
+    <div class="card"><span class="label">Value proposition</span>
+      <p class="small">A mobile-first instalment journey that answers the three big questions upfront, lets consumers combine their claims into one plan, sizes that plan to what they can keep, and hands the agent a summary when they still call. Success means SSR and the 60-day kept rate rising together, so a higher SSR means better plans, not just more of them.</p></div>
+  </div>
+  <div class="callout">
+    <span class="eyebrow">Initiative hypothesis</span>
+    <p style="margin-top:0.35rem">For multi-claim consumers like Mara, one combined plan sized to a typical month’s income will raise <b>kept plans per multi-claim starter from 27.4% to 32.4%</b>, while the 60-day missed-payment rate stays at or below 19%. Go/no-go after a 3-month pilot in Germany.</p>
+  </div>
+  <div class="grid g3">
+    <div class="card"><span class="label">Why now · the SSR trap</span>
+      <p class="small">SSR counts a plan the moment it’s created. When the plan screen began showing the 6-month plan first, SSR rose from 32.3% to 34.7%, missed payments rose from 15.6% to 19.0%, and kept plans per starter stayed flat at 37.3%.</p></div>
+    <div class="card"><span class="label">Who carries the pain</span>
+      <p class="small">Consumers with 2+ claims are 35.5% of starters but make 47% of agent contacts. Their SSR is 26% with two claims and 19.3% with three or more, against 40.6% with one. Shift workers miss payments 22.5% of the time, against 17.4% on a fixed salary.</p></div>
+    <div class="card"><span class="label">Where they leave</span>
+      <p class="small">Two steps lose 61% of everyone who drops out: the income question (19.3%, 1,421 a month) and the document upload that follows it (22.1%; 853 documents never arrived, T-201).</p></div>
+  </div>
+  <div class="slide-no">02 / 08</div>
+</section>
+
+<!-- 3 · Research -->
+<section id="s-research" data-title="Research">
+  <div class="eyebrow">Research</div>
+  <h2>Mara’s workaround: close the portal, pick up the phone</h2>
+  <div class="grid g2 fill" style="grid-template-columns: 1.25fr 1fr">
+    <div class="grid">
+      <div class="card"><span class="label">Persona</span>
+        <p class="small"><b>Mara, 38</b> · shift worker · two open claims · uses the portal on her phone in short breaks. <b>Goal:</b> one plan for both claims that she can actually keep, without calling anyone.</p></div>
+      <div class="card"><span class="label">Workaround · what she does today</span>
+        <ol class="steps small">
+          <li>Opens the portal on a break after a reminder, can’t tell which income figure is meant, and closes it.</li>
+          <li>Checks her paper letters to work out whether her two claims are linked.</li>
+          <li>Calls an agent to ask what “income” means, whether the claims can be combined and what a missed payment means.</li>
+          <li>The agent asks for everything again, because he can’t see what she typed online.</li>
+          <li>If she does finish online, she picks the shortest plan, misses the second payment and calls again.</li>
+        </ol></div>
+    </div>
+    <div class="grid">
+      <div class="card hero"><span class="label">Core frustration</span>
+        <p class="small">The income question. Short on time, she has to give a number she can’t define (“this month or a normal month?”) without knowing why it’s asked or how it will be used.</p></div>
+      <div class="card"><span class="label">The alternative she picks: a phone call</span>
+        <ul class="clean small">
+          <li class="quote">“It asked for my income and I did not know if they meant this month or a normal month. I closed it and meant to come back.” <span class="tag">N-01</span></li>
+          <li class="quote">“Honestly I prefer to call. A person can tell me if this is going to cost me more.” <span class="tag">N-04</span></li>
+          <li>Why income is asked: 16.2% of agent contacts, about 12 minutes each.</li>
+        </ul></div>
+    </div>
+  </div>
+  <div>
+    <div class="journey-head">
+      <span class="eyebrow">Journey map · how she feels today → what fixes it</span>
+      <span class="legend" aria-hidden="true"><span><i></i>Today</span><span><i class="fixed"></i>What fixes it</span></span>
+      <span class="tag">future-state-journey.html</span>
+    </div>
+    <div class="mood" aria-hidden="true">
+      <svg viewBox="0 0 800 48" preserveAspectRatio="none">
+        <polyline class="fade" points="50,10 150,9 250,8 350,9 450,6 550,6 650,4 750,4" fill="none" stroke="#527a42" stroke-width="2" stroke-dasharray="6 5" vector-effect="non-scaling-stroke"/>
+        <polyline class="fade" points="50,24 150,31 250,20 350,45 450,28 550,24 650,36 750,32" fill="none" stroke="#9a9a9a" stroke-width="2" vector-effect="non-scaling-stroke"/>
+      </svg>
+      <span class="dot fix pop" style="left:6.25%;top:21%"></span>
+      <span class="dot fix pop" style="left:18.75%;top:19%"></span>
+      <span class="dot fix pop" style="left:31.25%;top:17%"></span>
+      <span class="dot fix pop" style="left:43.75%;top:19%"></span>
+      <span class="dot fix pop" style="left:56.25%;top:12.5%"></span>
+      <span class="dot fix pop" style="left:68.75%;top:12.5%"></span>
+      <span class="dot fix pop" style="left:81.25%;top:8%"></span>
+      <span class="dot fix pop" style="left:93.75%;top:8%"></span>
+      <span class="dot pop" style="left:6.25%;top:50%"></span>
+      <span class="dot pop" style="left:18.75%;top:65%"></span>
+      <span class="dot pop" style="left:31.25%;top:42%"></span>
+      <span class="dot low pop" style="left:43.75%;top:94%"></span>
+      <span class="dot pop" style="left:56.25%;top:58%"></span>
+      <span class="dot pop" style="left:68.75%;top:50%"></span>
+      <span class="dot pop" style="left:81.25%;top:75%"></span>
+      <span class="dot pop" style="left:93.75%;top:67%"></span>
+    </div>
+    <div class="journey">
+      <div class="stage"><span class="n">01</span><b>Notice</b><div class="today">Today: anxious</div><div class="fix">One tap to her case</div></div>
+      <div class="stage"><span class="n">02</span><b>Open</b><div class="today">Today: confused</div><div class="fix">Both claims, one total</div></div>
+      <div class="stage"><span class="n">03</span><b>Understand</b><div class="today">Today: wary</div><div class="fix">Why we ask, upfront</div></div>
+      <div class="stage misery"><span class="flag">MOMENT OF MISERY</span><b>Share income</b><div class="today">Today: gives up</div><div class="fix">Clear question (B2)</div></div>
+      <div class="stage"><span class="n">05</span><b>Choose</b><div class="today">Today: unsure</div><div class="fix">A plan she can keep</div></div>
+      <div class="stage"><span class="n">06</span><b>Confirm</b><div class="today">Today: uneasy</div><div class="fix">Consequences shown first</div></div>
+      <div class="stage"><span class="n">07</span><b>Keep</b><div class="today">Today: missed it</div><div class="fix">Reminder before due</div></div>
+      <div class="stage"><span class="n">08</span><b>Get help</b><div class="today">Today: repeats it all</div><div class="fix">Context on agent screen</div></div>
+    </div>
+  </div>
+  <div class="slide-no">03 / 08</div>
+</section>
+
+<!-- 4 · Blueprint -->
+<section id="s-blueprint" data-title="Blueprint">
+  <div class="eyebrow">Blueprint</div>
+  <h2>Eight backlog ideas, scored against kept plans. B2 goes first.</h2>
+  <div class="lanes">
+    <div class="lane" style="--lc:var(--forest)"><h3 style="color:var(--forest)">Now · this sprint</h3>
+      <div class="feat" style="--c:var(--forest)"><span class="id">B5</span>Mobile upload that works, or skip the document under a set amount <span class="tag">V4 · E1</span></div>
+      <div class="feat selected" style="--c:var(--forest)"><span class="id">B2</span>Clear income question: which figure, why we ask, who sees it <span class="tag sel">Selected</span></div>
+      <div class="feat" style="--c:var(--forest)"><span class="id">B6</span>Payment date that matches payday <span class="tag">V4 · E1</span></div></div>
+    <div class="lane" style="--lc:var(--sage)"><h3 style="color:var(--ink)">Next</h3>
+      <div class="feat" style="--c:var(--sage)"><span class="id">B3</span>Affordability check before the plan options <span class="tag">V5 · E4</span></div>
+      <div class="feat" style="--c:var(--sage)"><span class="id">B1</span>One plan for several open claims <span class="tag">V5 · E5</span></div>
+      <div class="feat" style="--c:var(--sage)"><span class="id">B4</span>Handoff summary for the agent <span class="tag">V3 · E3</span></div></div>
+    <div class="lane later"><h3 style="color:var(--grey)">Later</h3>
+      <div class="feat" style="--c:var(--grey-300)"><span class="id">B8</span>Chat assistant on every page. Chat users miss more payments (21.6% vs 18.3%) <span class="tag">V1 · E5</span></div></div>
+    <div class="lane" style="--lc:var(--coral)"><h3 style="color:var(--coral-deep)">Cut</h3>
+      <div class="feat cut" style="--c:var(--coral)"><span class="id">B7</span>Show the shortest plan first</div>
+      <p class="xs muted">Already live as the 6-month default: more plans, no more kept plans. Revert it.</p></div>
+  </div>
+  <div class="grid g3 fill">
+    <div class="card hero"><span class="label">Why B2 first</span>
+      <p class="small">It fixes the exact moment Mara gives up (N-01), sits on the 19.3% drop, needs no back-end work (Effort 1), and the clear income figure it produces is the input B3 needs later.</p></div>
+    <div class="card"><span class="label">PRD · the four must-haves</span>
+      <ol class="steps small">
+        <li>Name the period: “Your usual monthly income after tax”, plus “If your pay changes, use a lower month.”</li>
+        <li>One line on why we ask, next to the field.</li>
+        <li>One line on who sees it and how long it’s kept, from approved Data Protection text.</li>
+        <li>All of it readable at 375px without scrolling, because 78% of starters are on mobile.</li>
+      </ol></div>
+    <div class="card"><span class="label">What the PRD makes explicit</span>
+      <p class="small">Every line comes from a versioned, approved text ID. If one is missing, the step is blocked and a person is offered. No developer or AI writes the wording, least of all how long her data is kept.</p></div>
+  </div>
+  <div class="grid g2" style="grid-template-columns: 1fr auto; align-items:center">
+    <p class="xs muted"><b style="color:var(--ink)">What the prototype revealed:</b> cases the PRD hadn’t covered, such as German number formats (1.850 vs 1,850), a “no income right now” answer that needs a support path, and a retention period only Data Protection can fill in. They’re useful, but they stay out of the A/B variant so the test measures one change.</p>
+    <span class="chip proto">Prototype · 04-roadmap/prototype.html</span>
+  </div>
+  <div class="slide-no">04 / 08</div>
+</section>
+
+<!-- 5 · Validation -->
+<section id="s-validation" data-title="Validation">
+  <div class="eyebrow">Validation</div>
+  <h2>First test: does a clear question get more people through?</h2>
+  <div class="callout">
+    <span class="eyebrow">Test hypothesis</span>
+    <p style="margin-top:0.3rem">For multi-claim consumers like Mara, a clear income question (which figure, why we ask, who sees it) will raise <b>income-step completion by 5 points, from 80.7% to 85.7%</b>, within 4 weeks, without raising agent contacts or missed payments.</p>
+  </div>
+  <div class="metric-row">
+    <div class="metric"><div class="k">Primary</div><div class="v" style="color:var(--forest); font-size:0.92rem; line-height:1.25">Income-step completion</div></div>
+    <div class="metric"><div class="k">Baseline</div><div class="v">80.7%*</div></div>
+    <div class="metric"><div class="k">MDE</div><div class="v" style="color:var(--forest)">+5 pts</div></div>
+    <div class="metric"><div class="k">Sample / arm</div><div class="v">1,059</div></div>
+    <div class="metric"><div class="k">Split · duration</div><div class="v">50/50 · 4 wk</div></div>
+    <div class="metric"><div class="k">Significance</div><div class="v">p &lt; 0.05</div></div>
+  </div>
+  <div class="grid g3 fill">
+    <div class="card"><span class="label">Control (A) · today</span>
+      <p class="small">The step asks for “income” with no period, no reason and no retention line (T-206). Shift workers can’t tell which month is meant (N-01), and 19.3% leave here.</p></div>
+    <div class="card hero"><span class="label">Variant (B) · one change, four lines of copy</span>
+      <ul class="clean small">
+        <li>Label: “Your usual monthly income after tax”.</li>
+        <li>Variable-pay hint, always visible.</li>
+        <li>Why line (≤20 words) and retention line (≤25 words), from approved text.</li>
+        <li>Nothing else changes: no new answers, no new validation.</li>
+      </ul></div>
+    <div class="card"><span class="label">Guardrails</span>
+      <ul class="clean small">
+        <li><b>Agent contacts within 7 days:</b> no more than 2 points above control.</li>
+        <li><b>60-day missed payments:</b> a tripwire, not a test. Roll back above control + 3 points or 22%; about 400 agreements per arm can’t detect +1.</li>
+      </ul></div>
+  </div>
+  <div class="decide">
+    <span class="fork-pill">Read once · end of week 4</span>
+    <svg class="fork" viewBox="0 0 900 40" preserveAspectRatio="none" aria-hidden="true">
+      <path class="fade" d="M450 0 C450 24 150 16 150 40" fill="none" stroke="#527a42" stroke-width="2.5" vector-effect="non-scaling-stroke"/>
+      <path class="fade" d="M450 0 V40" fill="none" stroke="#86a27b" stroke-width="2.5" stroke-dasharray="5 5" vector-effect="non-scaling-stroke"/>
+      <path class="fade" d="M450 0 C450 24 750 16 750 40" fill="none" stroke="#ef706b" stroke-width="2.5" vector-effect="non-scaling-stroke"/>
+    </svg>
+    <div class="rules">
+      <div class="rule ship"><b style="color:var(--forest)">Ship</b>+5 points or more at p &lt; 0.05, with 7-day contacts within +2 points. Roll out to all German multi-claim starters, then watch the 60-day tripwire.</div>
+      <div class="rule iterate"><b style="color:var(--ink)">Iterate</b>Positive but below +5 points, or not significant. Test new wording for the why and retention lines.</div>
+      <div class="rule kill"><b style="color:var(--coral-deep)">Kill</b>No lift, a drop, or a guardrail breach. Keep today’s step and rethink the fix.</div>
+    </div>
+  </div>
+  <p class="xs muted">One read, at the end of week 4. The test is void if the split drifts more than 1 point from 50/50 or an approved text fails to load. *80.7% is the all-starter rate; get the multi-claim rate before launch (a lower baseline could stretch the test to 5 weeks).</p>
+  <div class="slide-no">05 / 08</div>
+</section>
+
+<!-- 6 · Launch -->
+<section id="s-launch" data-title="Launch">
+  <div class="eyebrow">Launch</div>
+  <h2>A quiet launch, measured loudly</h2>
+  <div class="grid g4">
+    <div class="card hero"><span class="label">Goal</span><p style="font-size:1.35rem; font-weight:800; color:var(--forest)">Conversion</p><p class="xs muted">More people through the income step: 80.7% → 85.7%</p></div>
+    <div class="card"><span class="label">Audience</span><p class="small">German portal users with 2+ open claims who start a plan: about 2,968 a month. 78% of all starters are on mobile. Internally: agents, client account managers, compliance.</p></div>
+    <div class="card"><span class="label">Launch tier</span><p style="font-size:1.35rem; font-weight:800">S · Minimal</p><p class="xs muted">A copy change inside the product. Advertising a debt-collection journey would feel pushy.</p></div>
+    <div class="card"><span class="label">Channels</span>
+      <div style="display:flex; flex-direction:column; gap:0.4rem; align-items:flex-start">
+        <span class="pill" style="color:var(--forest)">Owned · the step + Help/FAQ, same text IDs</span>
+        <span class="pill" style="color:var(--ink); border-color:var(--sage)">Earned · client reporting</span>
+        <span class="pill" style="color:var(--grey); border-style:dashed">Paid · none, on purpose</span>
+      </div></div>
+  </div>
+  <div>
+    <span class="eyebrow">Success-metrics dashboard</span>
+    <div class="dash" style="margin-top:0.45rem">
+      <div class="tile"><div class="k" style="color:var(--forest)">Primary</div><div class="v">+5 pts</div><div class="xs muted">income-step completion, p &lt; 0.05</div></div>
+      <div class="tile"><div class="k" style="color:var(--forest)">Supporting</div><div class="v">&lt; 16.2%</div><div class="xs muted">share of “why is income asked?” contacts</div></div>
+      <div class="tile"><div class="k" style="color:var(--forest)">Guardrail</div><div class="v">≤ +2 pts</div><div class="xs muted">agent contacts within 7 days</div></div>
+      <div class="tile"><div class="k" style="color:var(--coral-deep)">Tripwire</div><div class="v">+3 pts · ≤ 22%</div><div class="xs muted">60-day missed payments vs control</div></div>
+    </div>
+  </div>
+  <div class="grid g2" style="grid-template-columns: 1.15fr 1fr">
+    <div class="bad"><span class="label eyebrow">Bad signal to watch for</span>
+      <p class="small">Completion rises, but so do re-entered figures, €0 entries or calls asking “how long do you keep my data?”. That would mean the retention line created a new worry. Or missed payments climb, because people who are unsure of their figure now get through.</p></div>
+    <div class="card"><span class="label">Likely post-launch decision</span>
+      <p class="small">Roll it out to all German starters, single-claim too, since the copy isn’t segment-specific. Then use the clear income figure as the input for B3, affordability-based plan sizing.</p></div>
+  </div>
+  <div class="timeline">
+    <span class="tl-line" aria-hidden="true"></span>
+    <div class="tl"><b>WEEK 0</b>Text sign-off, agent briefing, launch checklist</div>
+    <div class="tl"><b>WEEKS 1–4</b>50/50 test, no peeking</div>
+    <div class="tl"><b>END WEEK 4</b>Read once, go/no-go</div>
+    <div class="tl"><b>WEEK 5</b>100% of German multi-claim starters</div>
+    <div class="tl warn"><b>+60 DAYS</b>Missed-payment tripwire review</div>
+    <div class="tl later"><b>THEN</b>Other markets once their approved texts exist</div>
+  </div>
+  <div class="slide-no">06 / 08</div>
+</section>
+
+<!-- 7 · Story -->
+<section id="s-story" class="soft" data-title="Story">
+  <div class="eyebrow">Story</div>
+  <h2>What I learned on the way</h2>
+  <div class="aha">
+    <div class="callout">
+      <span class="eyebrow">Aha moment</span>
+      <p style="margin-top:0.35rem; font-size:1.6rem; font-weight:800; letter-spacing:-0.02em">A plan created is not a case solved.</p>
+      <p class="small" style="margin-top:0.35rem; color:rgba(255,255,255,0.85)">SSR went up while kept plans stayed flat. So I stopped asking how to get more plans created, and started asking how to get more plans kept.</p>
+    </div>
+    <div class="card trap"><span class="label">The SSR trap · before and after the 6-month plan was shown first (Month 4)</span>
+      <svg viewBox="0 0 330 150" aria-label="SSR rose from 32.3% to 34.7%, missed payments rose from 15.6% to 19.0%, kept plans per starter stayed at 37.3%">
+        <line x1="70" y1="14" x2="70" y2="136" stroke="#e7e4e2" stroke-width="1.5"/>
+        <line x1="230" y1="14" x2="230" y2="136" stroke="#e7e4e2" stroke-width="1.5"/>
+        <path class="draw" pathLength="1" d="M70 27.8 L230 27.8" stroke="#282828" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <path class="draw" pathLength="1" d="M70 50.9 L230 39.8" stroke="#527a42" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <path class="draw" pathLength="1" d="M70 128 L230 112.3" stroke="#ef706b" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <g font-family="Manrope, system-ui, sans-serif" font-size="11" font-weight="700">
+          <text x="62" y="31.6" text-anchor="end" fill="#282828">37.3%</text>
+          <text x="62" y="54.7" text-anchor="end" fill="#527a42">32.3%</text>
+          <text x="62" y="131.8" text-anchor="end" fill="#c4524d">15.6%</text>
+          <g class="fade">
+            <text x="240" y="25" fill="#282828">Kept 37.3%</text>
+            <text x="240" y="46" fill="#527a42">SSR 34.7%</text>
+            <text x="240" y="116.1" fill="#c4524d">Missed 19.0%</text>
+          </g>
+          <text x="70" y="149" text-anchor="middle" fill="#686868" font-size="9.5">MONTH 3</text>
+          <text x="230" y="149" text-anchor="middle" fill="#686868" font-size="9.5">MONTH 6</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+  <div class="grid g3 fill">
+    <div class="card"><span class="label">Friction points</span>
+      <ul class="clean small">
+        <li><b>My first hook was about agent cost,</b> with no consumer in it. The data made me rewrite it around Mara.</li>
+        <li><b>My best metric was too slow.</b> Kept plans take 60 days and depend on later screens, so the B2 test measures the step itself and kept plans protect it.</li>
+        <li><b>The data shows one segment at a time,</b> so “two claims plus shift work” is still an assumption.</li>
+      </ul></div>
+    <div class="card hero"><span class="label">Key takeaways</span>
+      <ol class="steps small">
+        <li>Fix the one place people leave before building the big thing.</li>
+        <li>Measure the outcome a metric can’t fake: kept plans, not created plans.</li>
+        <li>Legal and data-use wording only ever comes from approved text, never from a developer or a model.</li>
+      </ol></div>
+    <div class="card"><span class="label">What I’d do next</span>
+      <ol class="steps small">
+        <li>Get the multi-claim baseline, then run the 4-week B2 test.</li>
+        <li>Revert the 6-month-first plan default.</li>
+        <li>Build B3, affordability sizing, on the clear income figure.</li>
+        <li>Then B1, one plan for several claims, to close the initiative.</li>
+      </ol></div>
+  </div>
+  <div class="slide-no">07 / 08</div>
+</section>
+
+<!-- 8 · Thank you -->
+<section class="thanks soft" id="s-thanks" data-title="Thank you">
+  <div class="eyebrow">Thank you</div>
+  <h2>Questions?</h2>
+  <p class="muted" style="font-size:1.15rem; max-width:48ch; font-weight:500">One clearer question first. Kept plans, not created plans, decide what comes next.</p>
+  <div class="meta-row">
+    <span class="chip"><a href="https://github.com/karanmody-riverty/pm-final-project-riverty-km1">github.com/karanmody-riverty/pm-final-project-riverty-km1</a></span>
+    <span class="chip">Karan · PM Cohort · Nov 2026</span>
+    <span class="chip proto">Prototype · 04-roadmap/prototype.html</span>
+  </div>
+  <span class="submit">↗ Submit to the learning platform</span>
+  <p class="xs muted">All people, numbers and events in this case are fictional sample data, not Riverty research.</p>
+  <div class="slide-no">08 / 08</div>
+</section>
+
+</main>
+
+<script>
+  (function () {
+    document.documentElement.classList.add("js");
+    var reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var slides = Array.prototype.slice.call(document.querySelectorAll("main > section"));
+    var dots = document.getElementById("dots");
+    var bar = document.getElementById("progress");
+    var current = 0;
+
+    var REVEAL = ".eyebrow, h1, h2, .pitch, .meta-row, .card, .callout, .lane, .feat, .metric, .fork-pill, .rule, .tile, .tl, .stage, .journey-head, .bad, .submit, section > p";
+    var ANIMATED = ".r, .draw, .fade, .pop, .tl-line";
+    slides.forEach(function (s) {
+      var step = 0;
+      s.querySelectorAll(REVEAL + ", " + ANIMATED).forEach(function (el) {
+        if (el.matches(REVEAL)) el.classList.add("r");
+        el.style.setProperty("--d", Math.min(step * 70, 1600) + "ms");
+        step++;
+      });
+    });
+
+    function countUp(el) {
+      var to = parseFloat(el.getAttribute("data-count"));
+      var dec = parseInt(el.getAttribute("data-dec") || "0", 10);
+      var suffix = el.getAttribute("data-suffix") || "";
+      var start = null;
+      function frame(t) {
+        if (start === null) start = t;
+        var k = Math.min(1, (t - start) / 1100);
+        var eased = 1 - Math.pow(1 - k, 3);
+        el.textContent = (to * eased).toFixed(dec) + suffix;
+        if (k < 1) requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
+    }
+
+    function play(s) {
+      if (s.classList.contains("in")) return;
+      s.classList.add("in");
+      if (!reduced) s.querySelectorAll("[data-count]").forEach(countUp);
+    }
+
+    if (reduced || !("IntersectionObserver" in window)) {
+      slides.forEach(play);
+    } else {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) { if (e.isIntersecting) { play(e.target); io.unobserve(e.target); } });
+      }, { threshold: 0.35 });
+      slides.forEach(function (s) { io.observe(s); });
+    }
+
+    slides.forEach(function (s, i) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.title = s.getAttribute("data-title");
+      b.innerHTML = "<span>Go to slide " + (i + 1) + ": " + s.getAttribute("data-title") + "</span>";
+      b.addEventListener("click", function () { go(i); });
+      dots.appendChild(b);
+    });
+
+    function go(i) {
+      current = Math.max(0, Math.min(slides.length - 1, i));
+      slides[current].scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" });
+    }
+
+    function update() {
+      var max = document.documentElement.scrollHeight - innerHeight;
+      bar.style.width = (max > 0 ? (scrollY / max) * 100 : 0) + "%";
+      var mid = scrollY + innerHeight / 2, idx = 0;
+      slides.forEach(function (s, i) { if (s.offsetTop <= mid) idx = i; });
+      current = idx;
+      Array.prototype.forEach.call(dots.children, function (d, i) {
+        d.classList.toggle("on", i === idx);
+        d.setAttribute("aria-current", i === idx ? "true" : "false");
+      });
+    }
+
+    addEventListener("scroll", update, { passive: true });
+    addEventListener("resize", update);
+    addEventListener("keydown", function (e) {
+      if (e.target.closest && e.target.closest("input, textarea")) return;
+      var k = e.key;
+      if (k === "ArrowDown" || k === "PageDown" || (k === " " && !e.shiftKey)) { e.preventDefault(); go(current + 1); }
+      else if (k === "ArrowUp" || k === "PageUp" || (k === " " && e.shiftKey)) { e.preventDefault(); go(current - 1); }
+      else if (k === "Home") { e.preventDefault(); go(0); }
+      else if (k === "End") { e.preventDefault(); go(slides.length - 1); }
+      else if (k === "Escape") { e.preventDefault(); go(0); }
+    });
+    update();
+  })();
+</script>
+</body>
+</html>
